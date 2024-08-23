@@ -191,7 +191,7 @@ public class WordContentControlAnalayzer {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public List<ContentControlStructureDTO> scanDocument() {
+	public List<ContentControlStructureDTO> scanDocument() throws Docx4JException {
 		List<ContentControlStructureDTO> rootList = new ArrayList<ContentControlStructureDTO>();
 		Set<String> rootLevelContentControlDuplicatePreventingSet = new HashSet<String>();
 
@@ -210,26 +210,18 @@ public class WordContentControlAnalayzer {
 			}
 		}
 
-		try {
-			if (headerPart != null) {
-				scanDocumentRecursive(((ContentAccessor) headerPart.getContents()).getContent(), rootList,
-						rootLevelContentControlDuplicatePreventingSet);
-			}
-		} catch (Docx4JException e) {
-			Logger.error(e, "Problem scanning header part!");
+		if (headerPart != null) {
+			scanDocumentRecursive(((ContentAccessor) headerPart.getContents()).getContent(), rootList,
+					rootLevelContentControlDuplicatePreventingSet);
 		}
-
 		// get main part placeholders
 		scanDocumentRecursive(mainDocumentPart.getContent(), rootList, rootLevelContentControlDuplicatePreventingSet);
 
 		// get footer placeholders
-		try {
-			if (footerPart != null) {
-				scanDocumentRecursive(((ContentAccessor) footerPart.getContents()).getContent(), rootList,
-						rootLevelContentControlDuplicatePreventingSet);
-			}
-		} catch (Docx4JException e) {
-			Logger.error(e, "Problem scanning footer part!");
+
+		if (footerPart != null) {
+			scanDocumentRecursive(((ContentAccessor) footerPart.getContents()).getContent(), rootList,
+					rootLevelContentControlDuplicatePreventingSet);
 		}
 
 		return rootList;
