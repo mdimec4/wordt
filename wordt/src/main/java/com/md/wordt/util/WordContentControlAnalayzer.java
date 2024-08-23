@@ -5,12 +5,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.docx4j.Docx4J;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.JaxbXmlPart;
+import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
+import org.docx4j.openpackaging.parts.relationships.Namespaces;
+import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
+import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.CTSdtCell;
 import org.docx4j.wml.CTSdtRow;
 import org.docx4j.wml.ContentAccessor;
@@ -18,6 +25,8 @@ import org.docx4j.wml.SdtBlock;
 import org.docx4j.wml.SdtElement;
 import org.docx4j.wml.SdtRun;
 import org.docx4j.wml.Tag;
+import org.springframework.cglib.core.TinyBitSet;
+import org.tinylog.Logger;
 
 import com.md.wordt.dto.ContentControlStructureDTO;
 
@@ -113,8 +122,9 @@ public class WordContentControlAnalayzer {
 		return rsiOpt.isPresent();
 	}
 
-	private void scanDocumentRecursive(List<Object> docElementContent, List<ContentControlStructureDTO> dtoContent) {
-		if (docElementContent == null || dtoContent == null)
+	private void scanDocumentRecursive(List<Object> docElementContent, List<ContentControlStructureDTO> dtoContent,
+			Set<String> levelContentControlDuplicatePreventingSet) {
+		if (docElementContent == null || dtoContent == null || levelContentControlDuplicatePreventingSet == null)
 			return;
 
 		for (Object object : docElementContent) {
@@ -127,14 +137,21 @@ public class WordContentControlAnalayzer {
 			List<ContentControlStructureDTO> childDTOs = null;
 			if (object instanceof SdtElement) {
 				SdtElement sdtElement = (SdtElement) object;
+				String tag = getSdtTag(sdtElement);
+
+				if (!tag.isEmpty()) {
+					if (levelContentControlDuplicatePreventingSet.contains(tag))
+						continue;
+					levelContentControlDuplicatePreventingSet.add(tag);
+				}
+
 				childContent = sdtElement.getSdtContent().getContent();
 
-				String tag = getSdtTag(sdtElement);
-				System.out.println("Tag: " + tag);
+				// System.out.println("Tag: " + tag);
 				String name = getSdtName(sdtElement);
-				System.out.println("Name: " + name);
+				// System.out.println("Name: " + name);
 				boolean isRepeatingSection = isW15RepeatingSection(sdtElement);
-				System.out.println("isRepeatingSection: " + isRepeatingSection);
+				// System.out.println("isRepeatingSection: " + isRepeatingSection);
 				// boolean isRepeatingSectionItem = isW15RepeatingSectionItem(sdtElement);
 				// System.out.println("isRepatingSectionItem: " + isRepeatingSectionItem);
 
@@ -165,18 +182,55 @@ public class WordContentControlAnalayzer {
 				ContentAccessor ca = (ContentAccessor) object;
 				childContent = ca.getContent();
 			}
-			
+
 			if (childContent != null && childDTOs == null)
-				scanDocumentRecursive(childContent, dtoContent);
+				scanDocumentRecursive(childContent, dtoContent, levelContentControlDuplicatePreventingSet);
 			else if (childContent != null && childDTOs != null)
-				scanDocumentRecursive(childContent, childDTOs);
+				scanDocumentRecursive(childContent, childDTOs, new HashSet<String>());
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	public List<ContentControlStructureDTO> scanDocument() {
 		List<ContentControlStructureDTO> rootList = new ArrayList<ContentControlStructureDTO>();
-		wordPackage.getMainDocumentPart();
-		scanDocumentRecursive(wordPackage.getMainDocumentPart().getContent(), rootList);
+		Set<String> rootLevelContentControlDuplicatePreventingSet = new HashSet<String>();
+
+		MainDocumentPart mainDocumentPart = wordPackage.getMainDocumentPart();
+		JaxbXmlPart headerPart = null;
+		JaxbXmlPart footerPart = null;
+
+		// get also header placeholders
+		RelationshipsPart relationshipPart = mainDocumentPart.getRelationshipsPart();
+		List<Relationship> relationships = relationshipPart.getRelationships().getRelationship();
+		for (Relationship r : relationships) {
+			if (r.getType().equals(Namespaces.HEADER)) {
+				headerPart = (JaxbXmlPart) relationshipPart.getPart(r);
+			} else if (r.getType().equals(Namespaces.FOOTER)) {
+				footerPart = (JaxbXmlPart) relationshipPart.getPart(r);
+			}
+		}
+
+		try {
+			if (headerPart != null) {
+				scanDocumentRecursive(((ContentAccessor) headerPart.getContents()).getContent(), rootList,
+						rootLevelContentControlDuplicatePreventingSet);
+			}
+		} catch (Docx4JException e) {
+			Logger.error(e, "Problem scanning header part!");
+		}
+
+		// get main part placeholders
+		scanDocumentRecursive(mainDocumentPart.getContent(), rootList, rootLevelContentControlDuplicatePreventingSet);
+
+		// get footer placeholders
+		try {
+			if (footerPart != null) {
+				scanDocumentRecursive(((ContentAccessor) footerPart.getContents()).getContent(), rootList,
+						rootLevelContentControlDuplicatePreventingSet);
+			}
+		} catch (Docx4JException e) {
+			Logger.error(e, "Problem scanning footer part!");
+		}
 
 		return rootList;
 	}
