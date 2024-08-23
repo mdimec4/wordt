@@ -36,12 +36,10 @@ public class WordContentControlAnalayzer {
 
 	public WordContentControlAnalayzer(WordprocessingMLPackage wordPackage) {
 		this.wordPackage = wordPackage;
-
 	}
 
 	public WordContentControlAnalayzer(InputStream inputStream) throws Docx4JException {
 		wordPackage = Docx4J.load(inputStream);
-
 	}
 
 	public WordContentControlAnalayzer(File file) throws Docx4JException, FileNotFoundException {
@@ -120,7 +118,7 @@ public class WordContentControlAnalayzer {
 		return rsiOpt.isPresent();
 	}
 
-	private void scanDocumentRecursive(List<Object> docElementContent, List<ContentControlStructureDTO> dtoContent,
+	private static void scanDocumentRecursive(List<Object> docElementContent, List<ContentControlStructureDTO> dtoContent,
 			Set<String> levelContentControlDuplicatePreventingSet) {
 		if (docElementContent == null || dtoContent == null || levelContentControlDuplicatePreventingSet == null)
 			return;
@@ -194,21 +192,21 @@ public class WordContentControlAnalayzer {
 		Set<String> rootLevelContentControlDuplicatePreventingSet = new HashSet<String>();
 
 		MainDocumentPart mainDocumentPart = wordPackage.getMainDocumentPart();
-		JaxbXmlPart headerPart = null;
-		JaxbXmlPart footerPart = null;
+		List<JaxbXmlPart> headerParts = new ArrayList<JaxbXmlPart>();
+		List<JaxbXmlPart> footerParts = new ArrayList<JaxbXmlPart>();
 
 		// get also header placeholders
 		RelationshipsPart relationshipPart = mainDocumentPart.getRelationshipsPart();
 		List<Relationship> relationships = relationshipPart.getRelationships().getRelationship();
 		for (Relationship r : relationships) {
 			if (r.getType().equals(Namespaces.HEADER)) {
-				headerPart = (JaxbXmlPart) relationshipPart.getPart(r);
+				headerParts.add((JaxbXmlPart) relationshipPart.getPart(r));
 			} else if (r.getType().equals(Namespaces.FOOTER)) {
-				footerPart = (JaxbXmlPart) relationshipPart.getPart(r);
+				footerParts.add((JaxbXmlPart) relationshipPart.getPart(r));
 			}
 		}
 
-		if (headerPart != null) {
+		for (JaxbXmlPart headerPart : headerParts) {
 			scanDocumentRecursive(((ContentAccessor) headerPart.getContents()).getContent(), rootList,
 					rootLevelContentControlDuplicatePreventingSet);
 		}
@@ -216,8 +214,7 @@ public class WordContentControlAnalayzer {
 		scanDocumentRecursive(mainDocumentPart.getContent(), rootList, rootLevelContentControlDuplicatePreventingSet);
 
 		// get footer placeholders
-
-		if (footerPart != null) {
+		for (JaxbXmlPart footerPart : footerParts) {
 			scanDocumentRecursive(((ContentAccessor) footerPart.getContents()).getContent(), rootList,
 					rootLevelContentControlDuplicatePreventingSet);
 		}

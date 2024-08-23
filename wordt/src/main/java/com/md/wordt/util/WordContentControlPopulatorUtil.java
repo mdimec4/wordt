@@ -3,7 +3,6 @@ package com.md.wordt.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -22,7 +21,6 @@ public class WordContentControlPopulatorUtil {
 
 	public WordContentControlPopulatorUtil(InputStream inputStream) throws Docx4JException {
 		wordPackage = Docx4J.load(inputStream);
-
 	}
 
 	public WordContentControlPopulatorUtil(File file) throws Docx4JException, FileNotFoundException {
