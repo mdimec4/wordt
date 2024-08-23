@@ -25,8 +25,6 @@ import org.docx4j.wml.SdtBlock;
 import org.docx4j.wml.SdtElement;
 import org.docx4j.wml.SdtRun;
 import org.docx4j.wml.Tag;
-import org.springframework.cglib.core.TinyBitSet;
-import org.tinylog.Logger;
 
 import com.md.wordt.dto.ContentControlStructureDTO;
 
