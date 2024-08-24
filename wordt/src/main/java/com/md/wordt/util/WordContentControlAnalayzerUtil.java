@@ -30,19 +30,19 @@ import com.md.wordt.dto.ContentControlStructureDTO;
 
 import jakarta.xml.bind.JAXBElement;
 
-public class WordContentControlAnalayzer {
+public class WordContentControlAnalayzerUtil {
 
 	private WordprocessingMLPackage wordPackage;
 
-	public WordContentControlAnalayzer(WordprocessingMLPackage wordPackage) {
+	public WordContentControlAnalayzerUtil(WordprocessingMLPackage wordPackage) {
 		this.wordPackage = wordPackage;
 	}
 
-	public WordContentControlAnalayzer(InputStream inputStream) throws Docx4JException {
+	public WordContentControlAnalayzerUtil(InputStream inputStream) throws Docx4JException {
 		wordPackage = Docx4J.load(inputStream);
 	}
 
-	public WordContentControlAnalayzer(File file) throws Docx4JException, FileNotFoundException {
+	public WordContentControlAnalayzerUtil(File file) throws Docx4JException, FileNotFoundException {
 		this(new FileInputStream(file));
 	}
 
@@ -141,7 +141,7 @@ public class WordContentControlAnalayzer {
 			if (object instanceof JAXBElement<?>) {
 				object = ((JAXBElement<?>) object).getValue();
 			}
-			System.out.println(object.getClass().getSimpleName());
+			// System.out.println(object.getClass().getSimpleName());
 
 			List<Object> childContent = null;
 			List<ContentControlStructureDTO> childDTOs = null;
@@ -229,7 +229,7 @@ public class WordContentControlAnalayzer {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, Docx4JException {
-		WordContentControlAnalayzer wcca = new WordContentControlAnalayzer(
+		WordContentControlAnalayzerUtil wcca = new WordContentControlAnalayzerUtil(
 				new File("C:\\koda\\wordT\\samples\\SampleCreatedInWord1.docx"));
 		wcca.scanDocument();
 	}
