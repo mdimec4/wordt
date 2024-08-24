@@ -5,8 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,6 +29,7 @@ import org.docx4j.wml.SdtRun;
 import org.docx4j.wml.Tag;
 
 import com.md.wordt.dto.ContentControlStructureDTO;
+import com.md.wordt.dto.ContentControlValuesDTO;
 
 import jakarta.xml.bind.JAXBElement;
 
@@ -229,9 +232,25 @@ public class WordContentControlAnalayzerUtil {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, Docx4JException {
-		WordContentControlAnalayzerUtil wcca = new WordContentControlAnalayzerUtil(
-				new File("C:\\koda\\wordT\\samples\\SampleCreatedInWord1.docx"));
-		wcca.scanDocument();
+		WordprocessingMLPackage wordPackageSource = Docx4J
+				.load(new File("C:\\koda\\wordT\\samples\\SampleCreatedInWord1.docx"));
+
+		WordContentControlAnalayzerUtil wcca = new WordContentControlAnalayzerUtil(wordPackageSource);
+		List<ContentControlStructureDTO> structureDTOs = wcca.scanDocument();
+
+		// clone
+		WordprocessingMLPackage wordPackageTarget = (WordprocessingMLPackage)wordPackageSource.clone();
+		
+		Map<String, List<ContentControlValuesDTO>> toPupulateDTOs = new HashMap<>();
+		ContentControlValuesDTO runCc = new ContentControlValuesDTO();
+		runCc.setLabel("RUN");
+		runCc.setValue("Niko je muc!");
+		toPupulateDTOs.put(runCc.getLabel(), List.of(runCc));
+		
+		WordContentControlPopulatorUtil populator = new WordContentControlPopulatorUtil(wordPackageTarget);
+		populator.populateDocument(toPupulateDTOs);
+		
+		populator.save(new File("C:\\koda\\wordT\\samples\\SampleCreatedInWord1_NIKO.docx"));
 	}
 
 }

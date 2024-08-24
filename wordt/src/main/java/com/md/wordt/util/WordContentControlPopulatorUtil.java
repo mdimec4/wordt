@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.docx4j.Docx4J;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -17,8 +18,15 @@ import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.openpackaging.parts.relationships.Namespaces;
 import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
+import org.docx4j.wml.CTSdtCell;
+import org.docx4j.wml.CTSdtRow;
 import org.docx4j.wml.ContentAccessor;
+import org.docx4j.wml.P;
+import org.docx4j.wml.R;
+import org.docx4j.wml.SdtBlock;
 import org.docx4j.wml.SdtElement;
+import org.docx4j.wml.SdtRun;
+import org.docx4j.wml.Text;
 import org.tinylog.Logger;
 
 import com.md.wordt.dto.ContentControlValuesDTO;
@@ -59,6 +67,74 @@ public class WordContentControlPopulatorUtil {
 	 * FileOutputStream(file); saveAsPdf(fileOutputStream); }
 	 */
 
+	private static P findFirstChildParagraphInSdtElement(SdtElement sdtElement) {
+		Optional<Object> pOpt = sdtElement.getSdtContent().getContent() //
+				.stream() //
+				.filter(o -> (o instanceof P)) //
+				.findFirst();
+		if (pOpt.isEmpty())
+			return null;
+		return (P) pOpt.get();
+	}
+
+	private static R findFirstChildRunInSdtElement(SdtElement sdtElement) {
+		Optional<Object> rOpt = sdtElement.getSdtContent().getContent() //
+				.stream() //
+				.filter(o -> (o instanceof R)) //
+				.findFirst();
+		if (rOpt.isEmpty())
+			return null;
+		return (R) rOpt.get();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static Text findFirstTextInRun(R r) {
+		Optional<Object> jaxbElmOpt = r.getContent() //
+				.stream() //
+				.filter(o -> (o instanceof JAXBElement)).findFirst();
+		if (jaxbElmOpt.isEmpty())
+			return null;
+		JAXBElement jaxbElem = (JAXBElement) jaxbElmOpt.get();
+		if (!jaxbElem.getDeclaredType().equals(Text.class))
+			return null;
+		return (Text) jaxbElem.getValue();
+	}
+
+	private static void populateWithText(SdtElement sdtElement, String textValue) {
+		if (sdtElement == null || textValue == null || textValue.isEmpty())
+			return;
+
+		if (sdtElement instanceof CTSdtCell) {
+		} else if (sdtElement instanceof CTSdtRow) {
+		} else if (sdtElement instanceof SdtBlock) {
+		} else if (sdtElement instanceof SdtRun) {
+			populateWithTextSdtRun((SdtRun) sdtElement, textValue);
+		}
+	}
+
+	private static void populateWithTextSdtRun(SdtRun sdtRun, String textValue) {
+		if (sdtRun == null || textValue == null || textValue.isEmpty())
+			return;
+
+		R firstRun = findFirstChildRunInSdtElement(sdtRun);
+
+		sdtRun.getSdtContent().getContent().clear();
+		sdtRun.getSdtContent().getContent().add(firstRun); // remove all other content
+
+		populateWithTextRun(firstRun, textValue);
+	}
+
+	private static void populateWithTextRun(R r, String textValue) {
+		r.getRPr().setRStyle(null);
+		Text firstTextInRun = findFirstTextInRun(r);
+		if (firstTextInRun == null)
+			return;
+
+		textValue = textValue.replace("\r", "").replace("\n", "");
+
+		firstTextInRun.setValue(textValue);
+	}
+
 	private static void populateDocumentRecursive(List<Object> docElementContent,
 			Map<String, List<ContentControlValuesDTO>> dtoContent) {
 		if (docElementContent == null || dtoContent == null)
@@ -92,10 +168,18 @@ public class WordContentControlPopulatorUtil {
 					List<ContentControlValuesDTO> dtos = dtoContent.get(tag);
 					if (dtos == null || dtos.isEmpty())
 						continue;
-					if (dtos.size() > 1 && !isRepeatingSection) {
-						Logger.error(
-								"For label {} there are multiple entries for non repeating section. Extra will be ignored!",
-								tag);
+
+					if (isRepeatingSection) {
+
+					} else {
+						if (dtos.size() > 1) {
+							Logger.error(
+									"For label {} there are multiple entries for non repeating section. Extra will be ignored!",
+									tag);
+						}
+						String textValue = dtos.get(0).getValue();
+						if (textValue != null && !textValue.isEmpty())
+							populateWithText(sdtElement, textValue);
 					}
 
 					// childDTOs = dtoContent.get(tag).getChildren();
