@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ContentControlStructureDTO {
-	private String tag;
-	private String name;
+	private String tag = "";
+	private String name = "";
 	private boolean repeating = false;
 	private boolean multiParagraph = false;
 	private List<ContentControlStructureDTO> children = new ArrayList<ContentControlStructureDTO>();
@@ -45,9 +45,4 @@ public class ContentControlStructureDTO {
 	public List<ContentControlStructureDTO> getChildren() {
 		return children;
 	}
-
-	public void setChildren(List<ContentControlStructureDTO> children) {
-		this.children = children;
-	}
-
 }

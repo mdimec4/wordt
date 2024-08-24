@@ -118,8 +118,22 @@ public class WordContentControlAnalayzer {
 		return rsiOpt.isPresent();
 	}
 
-	private static void scanDocumentRecursive(List<Object> docElementContent, List<ContentControlStructureDTO> dtoContent,
-			Set<String> levelContentControlDuplicatePreventingSet) {
+	public static boolean isMultipleParagraph(SdtElement sdtElement) {
+		if (sdtElement instanceof CTSdtCell) {
+			return false;
+		} else if (sdtElement instanceof CTSdtRow) {
+			return false;
+		} else if (sdtElement instanceof SdtBlock) {
+			return true;
+		} else if (sdtElement instanceof SdtRun) {
+			return false;
+		}
+
+		return false;
+	}
+
+	private static void scanDocumentRecursive(List<Object> docElementContent,
+			List<ContentControlStructureDTO> dtoContent, Set<String> levelContentControlDuplicatePreventingSet) {
 		if (docElementContent == null || dtoContent == null || levelContentControlDuplicatePreventingSet == null)
 			return;
 
@@ -151,16 +165,8 @@ public class WordContentControlAnalayzer {
 				// boolean isRepeatingSectionItem = isW15RepeatingSectionItem(sdtElement);
 				// System.out.println("isRepatingSectionItem: " + isRepeatingSectionItem);
 
-				boolean isMultiParagraph = false;
-				if (sdtElement instanceof CTSdtCell) {
-					isMultiParagraph = false;
-				} else if (sdtElement instanceof CTSdtRow) {
-					isMultiParagraph = false;
-				} else if (sdtElement instanceof SdtBlock) {
-					isMultiParagraph = true;
-				} else if (sdtElement instanceof SdtRun) {
-					isMultiParagraph = false;
-				}
+				boolean isMultiParagraph = isMultipleParagraph(sdtElement);
+
 				System.out.println("MultiParagraph: " + isMultiParagraph);
 
 				if (!tag.isEmpty()) {
