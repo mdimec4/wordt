@@ -29,6 +29,7 @@ import org.docx4j.wml.RPr;
 import org.docx4j.wml.SdtBlock;
 import org.docx4j.wml.SdtElement;
 import org.docx4j.wml.SdtRun;
+import org.docx4j.wml.Tc;
 import org.docx4j.wml.Text;
 import org.tinylog.Logger;
 
@@ -80,6 +81,16 @@ public class WordContentControlPopulatorUtil {
 		return (P) pOpt.get();
 	}
 
+	private static P findFirstChildParagraphInContentAccessor(ContentAccessor contentAccessor) {
+		Optional<Object> pOpt = contentAccessor.getContent() //
+				.stream() //
+				.filter(o -> (o instanceof P)) //
+				.findFirst();
+		if (pOpt.isEmpty())
+			return null;
+		return (P) pOpt.get();
+	}
+
 	private static R findFirstChildRunInSdtElement(SdtElement sdtElement) {
 		Optional<Object> rOpt = sdtElement.getSdtContent().getContent() //
 				.stream() //
@@ -88,6 +99,35 @@ public class WordContentControlPopulatorUtil {
 		if (rOpt.isEmpty())
 			return null;
 		return (R) rOpt.get();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static Tc findFirstChildCellInSdtElement(SdtElement sdtElement) {
+		Optional<Tc> tcOpt = sdtElement.getSdtContent().getContent() //
+				.stream() //
+				.filter(o -> {
+					if (o instanceof Tc)
+						return true;
+
+					if (!(o instanceof JAXBElement))
+						return false;
+
+					JAXBElement el = (JAXBElement) o;
+					if (!el.getDeclaredType().equals(Tc.class))
+						return false;
+					return true;
+				}) //
+				.map(o -> {
+					if (o instanceof JAXBElement) {
+						JAXBElement el = (JAXBElement) o;
+						return (Tc) el.getValue();
+					}
+					return (Tc) o;
+				}) //
+				.findFirst();
+		if (tcOpt.isEmpty())
+			return null;
+		return tcOpt.get();
 	}
 
 	private static R findFirstChildRunInParagrph(P p) {
@@ -137,12 +177,43 @@ public class WordContentControlPopulatorUtil {
 			textValue = "";
 
 		if (sdtElement instanceof CTSdtCell) {
+			populateWithTextSdtCell((CTSdtCell) sdtElement, textValue);
 		} else if (sdtElement instanceof CTSdtRow) {
 		} else if (sdtElement instanceof SdtBlock) {
 			populateWithTextSdtBlock((SdtBlock) sdtElement, textValue);
 		} else if (sdtElement instanceof SdtRun) {
 			populateWithTextSdtRun((SdtRun) sdtElement, textValue);
 		}
+	}
+
+	private static void populateWithTextSdtCell(CTSdtCell sdtCell, String textValue) {
+		if (sdtCell == null) {
+			Logger.error("populateWithTextSdtCell: null TDSdtCell");
+			return;
+		}
+
+		if (textValue == null) {
+			textValue = "";
+		}
+		Tc tc = findFirstChildCellInSdtElement(sdtCell);
+		if (tc == null) {
+			Logger.error("populateWithTextSdtCell: null Tc");
+			return;
+		}
+
+		P p = findFirstChildParagraphInContentAccessor(tc);
+		if (p == null) {
+			Logger.error("populateWithTextSdtCell: null P");
+			return;
+		}
+
+		R firstRun = findFirstChildRunInParagrph(p);
+		if (firstRun == null) {
+			Logger.error("populateWithTextSdtCell: null R");
+			return;
+		}
+
+		populateWithTextRun(firstRun, textValue);
 	}
 
 	private static void populateWithTextSdtBlock(SdtBlock sdtBlock, String textValue) {
@@ -193,7 +264,8 @@ public class WordContentControlPopulatorUtil {
 	private static P createP(Object parent, P referenceP) {
 		P p = new P();
 		if (referenceP != null) {
-			PPr ppr = referenceP.getPPr(); // XXX object is shared not ideal: there will be impossible to modify just modify one paragraph without modifying others
+			PPr ppr = referenceP.getPPr(); // XXX object is shared not ideal: there will be impossible to modify just
+											// modify one paragraph without modifying others
 			p.setPPr(ppr);
 		}
 		p.setParent(parent);
@@ -205,7 +277,8 @@ public class WordContentControlPopulatorUtil {
 			contentText = "";
 		R r = new R();
 		if (referenceR != null) {
-			RPr rpr = referenceR.getRPr(); // XXX object is shared not ideal: there will be impossible to modify just modify one run without modifying others
+			RPr rpr = referenceR.getRPr(); // XXX object is shared not ideal: there will be impossible to modify just
+											// modify one run without modifying others
 			rpr.setRStyle(null);
 
 			r.setRPr(rpr);
@@ -240,6 +313,10 @@ public class WordContentControlPopulatorUtil {
 		}
 
 		R firstRun = findFirstChildRunInSdtElement(sdtRun);
+		if (firstRun == null) {
+			Logger.error("populateWithTextSdtRun: null R");
+			return;
+		}
 
 		sdtRun.getSdtContent().getContent().clear();
 		sdtRun.getSdtContent().getContent().add(firstRun); // remove all other content
@@ -287,7 +364,7 @@ public class WordContentControlPopulatorUtil {
 
 				childContent = sdtElement.getSdtContent().getContent();
 
-				// System.out.println("Tag: " + tag);
+				System.out.println("Tag: " + tag);
 				String name = WordContentControlAnalayzerUtil.getSdtName(sdtElement);
 				// System.out.println("Name: " + name);
 				boolean isRepeatingSection = WordContentControlAnalayzerUtil.isW15RepeatingSection(sdtElement);

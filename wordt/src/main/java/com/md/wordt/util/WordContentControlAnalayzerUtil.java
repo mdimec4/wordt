@@ -259,18 +259,18 @@ public class WordContentControlAnalayzerUtil {
 				+ "Runo mali\n" //
 				+ "pesek moj zali\n" //
 				+ "\n" //
-				+ "na travniky sedi\n" //
+				+ "na travniku sedi\n" //
 				+ "in se veseli!");
 		toPupulateDTOs.put(richCc.getLabel(), List.of(richCc));
 
 		ContentControlValuesDTO tabela1Cc = new ContentControlValuesDTO();
-		tabela1Cc.setLabel("TABELA1"); // TODO ne dela
+		tabela1Cc.setLabel("TABELA1");
 		tabela1Cc.setValue("Muc je muc");
 		toPupulateDTOs.put(tabela1Cc.getLabel(), List.of(tabela1Cc));
 
 		ContentControlValuesDTO tabela2Cc = new ContentControlValuesDTO();
-		tabela2Cc.setLabel("TABELA2"); // TODO ne dela
-		tabela2Cc.setValue("Muc je muc");
+		tabela2Cc.setLabel("TABELA2");
+		tabela2Cc.setValue("Muc je muc2");
 		toPupulateDTOs.put(tabela2Cc.getLabel(), List.of(tabela2Cc));
 
 		ContentControlValuesDTO footerCc = new ContentControlValuesDTO();
