@@ -239,17 +239,17 @@ public class WordContentControlAnalayzerUtil {
 		List<ContentControlStructureDTO> structureDTOs = wcca.scanDocument();
 
 		// clone
-		WordprocessingMLPackage wordPackageTarget = (WordprocessingMLPackage)wordPackageSource.clone();
-		
+		WordprocessingMLPackage wordPackageTarget = (WordprocessingMLPackage) wordPackageSource.clone();
+
 		Map<String, List<ContentControlValuesDTO>> toPupulateDTOs = new HashMap<>();
 		ContentControlValuesDTO runCc = new ContentControlValuesDTO();
 		runCc.setLabel("RUN");
 		runCc.setValue("Niko je muc!");
 		toPupulateDTOs.put(runCc.getLabel(), List.of(runCc));
-		
+
 		WordContentControlPopulatorUtil populator = new WordContentControlPopulatorUtil(wordPackageTarget);
 		populator.populateDocument(toPupulateDTOs);
-		
+
 		populator.save(new File("C:\\koda\\wordT\\samples\\SampleCreatedInWord1_NIKO.docx"));
 	}
 

@@ -92,16 +92,16 @@ public class WordContentControlPopulatorUtil {
 		Optional<Text> textOpt = r.getContent() //
 				.stream() //
 				.filter(o -> {
-					if(!(o instanceof JAXBElement))
+					if (!(o instanceof JAXBElement))
 						return false;
-					JAXBElement rawJaxbEl = (JAXBElement)o;
-					if(!rawJaxbEl.getDeclaredType().equals(Text.class))
+					JAXBElement rawJaxbEl = (JAXBElement) o;
+					if (!rawJaxbEl.getDeclaredType().equals(Text.class))
 						return false;
 					return true;
 				}) //
 				.map(o -> {
-					JAXBElement rawJaxbEl = (JAXBElement)o;
-					return (Text)rawJaxbEl.getValue();
+					JAXBElement rawJaxbEl = (JAXBElement) o;
+					return (Text) rawJaxbEl.getValue();
 				}) //
 				.findFirst();
 		if (textOpt.isEmpty())
@@ -111,8 +111,12 @@ public class WordContentControlPopulatorUtil {
 	}
 
 	private static void populateWithText(SdtElement sdtElement, String textValue) {
-		if (sdtElement == null || textValue == null || textValue.isEmpty())
+		if (sdtElement == null) {
+			Logger.error("populateWithText: null SdtElement");
 			return;
+		}
+		if (textValue == null)
+			textValue = "";
 
 		if (sdtElement instanceof CTSdtCell) {
 		} else if (sdtElement instanceof CTSdtRow) {
@@ -123,8 +127,14 @@ public class WordContentControlPopulatorUtil {
 	}
 
 	private static void populateWithTextSdtRun(SdtRun sdtRun, String textValue) {
-		if (sdtRun == null || textValue == null || textValue.isEmpty())
+		if (sdtRun == null) {
+			Logger.error("populateWithTextSdtRun: null SdtRun");
 			return;
+		}
+
+		if (textValue == null) {
+			textValue = "";
+		}
 
 		R firstRun = findFirstChildRunInSdtElement(sdtRun);
 
@@ -135,10 +145,20 @@ public class WordContentControlPopulatorUtil {
 	}
 
 	private static void populateWithTextRun(R r, String textValue) {
+		if (r == null) {
+			Logger.error("populateWithTextRun: null R");
+			return;
+		}
+
+		if (textValue == null) {
+			textValue = "";
+		}
 		r.getRPr().setRStyle(null);
 		Text firstTextInRun = findFirstTextInRun(r);
-		if (firstTextInRun == null)
+		if (firstTextInRun == null) {
+			Logger.error("populateWithTextRun: child Text element not found");
 			return;
+		}
 
 		textValue = textValue.replace("\r", "").replace("\n", "");
 
@@ -154,7 +174,7 @@ public class WordContentControlPopulatorUtil {
 			if (object instanceof JAXBElement<?>) {
 				object = ((JAXBElement<?>) object).getValue();
 			}
-			System.out.println(object.getClass().getSimpleName());
+			// System.out.println(object.getClass().getSimpleName());
 
 			List<Object> childContent = null;
 			Map<String, List<ContentControlValuesDTO>> childDTOs = null;
