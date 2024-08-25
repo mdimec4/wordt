@@ -171,16 +171,22 @@ public class WordContentControlPopulatorUtil {
 				currentP = createP(sdtBlock.getSdtContent(), referenceP);
 				sdtBlock.getSdtContent().getContent().add(currentP);
 			}
+
+			boolean lineBreak = false;
 			if (!currentP.getContent().isEmpty() && !line.isEmpty()) {
 				R newLineR = createNewLineR(currentP);
 				currentP.getContent().add(newLineR);
+				lineBreak = true;
 			}
 
-			R rWithText = createR(currentP, referenceR, line);
-			currentP.getContent().add(rWithText);
+			if ((!lineBreak && line.isEmpty()) || !line.isEmpty()) {
+				R rWithText = createR(currentP, referenceR, line);
+				currentP.getContent().add(rWithText);
+			}
 
-			if (line.isEmpty())
+			if (!lineBreak && line.isEmpty())
 				currentP = null;
+
 		}
 	}
 
