@@ -242,6 +242,12 @@ public class WordContentControlAnalayzerUtil {
 		WordprocessingMLPackage wordPackageTarget = (WordprocessingMLPackage) wordPackageSource.clone();
 
 		Map<String, List<ContentControlValuesDTO>> toPupulateDTOs = new HashMap<>();
+
+		ContentControlValuesDTO headerCc = new ContentControlValuesDTO();
+		headerCc.setLabel("HEADER");
+		headerCc.setValue("Muc je header");
+		toPupulateDTOs.put(headerCc.getLabel(), List.of(headerCc));
+
 		ContentControlValuesDTO runCc = new ContentControlValuesDTO();
 		runCc.setLabel("RUN");
 		runCc.setValue("Niko je muc!");
@@ -256,6 +262,21 @@ public class WordContentControlAnalayzerUtil {
 				+ "na travniky sedi\n" //
 				+ "in se veseli!");
 		toPupulateDTOs.put(richCc.getLabel(), List.of(richCc));
+
+		ContentControlValuesDTO tabela1Cc = new ContentControlValuesDTO();
+		tabela1Cc.setLabel("TABELA1"); // TODO ne dela
+		tabela1Cc.setValue("Muc je muc");
+		toPupulateDTOs.put(tabela1Cc.getLabel(), List.of(tabela1Cc));
+
+		ContentControlValuesDTO tabela2Cc = new ContentControlValuesDTO();
+		tabela2Cc.setLabel("TABELA2"); // TODO ne dela
+		tabela2Cc.setValue("Muc je muc");
+		toPupulateDTOs.put(tabela2Cc.getLabel(), List.of(tabela2Cc));
+
+		ContentControlValuesDTO footerCc = new ContentControlValuesDTO();
+		footerCc.setLabel("FOOTER");
+		footerCc.setValue("Muc je footer");
+		toPupulateDTOs.put(footerCc.getLabel(), List.of(footerCc));
 
 		WordContentControlPopulatorUtil populator = new WordContentControlPopulatorUtil(wordPackageTarget);
 		populator.populateDocument(toPupulateDTOs);
