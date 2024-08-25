@@ -89,15 +89,25 @@ public class WordContentControlPopulatorUtil {
 
 	@SuppressWarnings("rawtypes")
 	private static Text findFirstTextInRun(R r) {
-		Optional<Object> jaxbElmOpt = r.getContent() //
+		Optional<Text> textOpt = r.getContent() //
 				.stream() //
-				.filter(o -> (o instanceof JAXBElement)).findFirst();
-		if (jaxbElmOpt.isEmpty())
+				.filter(o -> {
+					if(!(o instanceof JAXBElement))
+						return false;
+					JAXBElement rawJaxbEl = (JAXBElement)o;
+					if(!rawJaxbEl.getDeclaredType().equals(Text.class))
+						return false;
+					return true;
+				}) //
+				.map(o -> {
+					JAXBElement rawJaxbEl = (JAXBElement)o;
+					return (Text)rawJaxbEl.getValue();
+				}) //
+				.findFirst();
+		if (textOpt.isEmpty())
 			return null;
-		JAXBElement jaxbElem = (JAXBElement) jaxbElmOpt.get();
-		if (!jaxbElem.getDeclaredType().equals(Text.class))
-			return null;
-		return (Text) jaxbElem.getValue();
+
+		return textOpt.get();
 	}
 
 	private static void populateWithText(SdtElement sdtElement, String textValue) {
