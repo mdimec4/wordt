@@ -193,8 +193,7 @@ public class WordContentControlPopulatorUtil {
 	private static P createP(Object parent, P referenceP) {
 		P p = new P();
 		if (referenceP != null) {
-			PPr ppr = new PPr();
-			ppr.setPStyle(referenceP.getPPr().getPStyle());
+			PPr ppr = referenceP.getPPr(); // XXX object is shared not ideal: there will be impossible to modify just modify one paragraph without modifying others
 			p.setPPr(ppr);
 		}
 		p.setParent(parent);
@@ -206,9 +205,9 @@ public class WordContentControlPopulatorUtil {
 			contentText = "";
 		R r = new R();
 		if (referenceR != null) {
-			RPr rpr = new RPr();
-			rpr.setRFonts(referenceR.getRPr().getRFonts());
+			RPr rpr = referenceR.getRPr(); // XXX object is shared not ideal: there will be impossible to modify just modify one run without modifying others
 			rpr.setRStyle(null);
+
 			r.setRPr(rpr);
 		}
 		r.setParent(parent);
