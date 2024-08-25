@@ -247,6 +247,16 @@ public class WordContentControlAnalayzerUtil {
 		runCc.setValue("Niko je muc!");
 		toPupulateDTOs.put(runCc.getLabel(), List.of(runCc));
 
+		ContentControlValuesDTO richCc = new ContentControlValuesDTO();
+		richCc.setLabel("RICH_ONE");
+		richCc.setValue("\n" //
+				+ "Runo mali\n" //
+				+ "pesek moj zali\n" //
+				+ "\n" //
+				+ "na travniky sedi\n" //
+				+ "in se veseli!");
+		toPupulateDTOs.put(richCc.getLabel(), List.of(richCc));
+
 		WordContentControlPopulatorUtil populator = new WordContentControlPopulatorUtil(wordPackageTarget);
 		populator.populateDocument(toPupulateDTOs);
 

@@ -18,11 +18,14 @@ import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.openpackaging.parts.relationships.Namespaces;
 import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
+import org.docx4j.wml.Br;
 import org.docx4j.wml.CTSdtCell;
 import org.docx4j.wml.CTSdtRow;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
+import org.docx4j.wml.PPr;
 import org.docx4j.wml.R;
+import org.docx4j.wml.RPr;
 import org.docx4j.wml.SdtBlock;
 import org.docx4j.wml.SdtElement;
 import org.docx4j.wml.SdtRun;
@@ -87,11 +90,24 @@ public class WordContentControlPopulatorUtil {
 		return (R) rOpt.get();
 	}
 
+	private static R findFirstChildRunInParagrph(P p) {
+		Optional<Object> rOpt = p.getContent() //
+				.stream() //
+				.filter(o -> (o instanceof R)) //
+				.findFirst();
+		if (rOpt.isEmpty())
+			return null;
+		return (R) rOpt.get();
+	}
+
 	@SuppressWarnings("rawtypes")
 	private static Text findFirstTextInRun(R r) {
 		Optional<Text> textOpt = r.getContent() //
 				.stream() //
 				.filter(o -> {
+					if (o instanceof Text)
+						return true;
+
 					if (!(o instanceof JAXBElement))
 						return false;
 					JAXBElement rawJaxbEl = (JAXBElement) o;
@@ -100,6 +116,8 @@ public class WordContentControlPopulatorUtil {
 					return true;
 				}) //
 				.map(o -> {
+					if (o instanceof Text)
+						return (Text) o;
 					JAXBElement rawJaxbEl = (JAXBElement) o;
 					return (Text) rawJaxbEl.getValue();
 				}) //
@@ -121,9 +139,89 @@ public class WordContentControlPopulatorUtil {
 		if (sdtElement instanceof CTSdtCell) {
 		} else if (sdtElement instanceof CTSdtRow) {
 		} else if (sdtElement instanceof SdtBlock) {
+			populateWithTextSdtBlock((SdtBlock) sdtElement, textValue);
 		} else if (sdtElement instanceof SdtRun) {
 			populateWithTextSdtRun((SdtRun) sdtElement, textValue);
 		}
+	}
+
+	private static void populateWithTextSdtBlock(SdtBlock sdtBlock, String textValue) {
+		if (sdtBlock == null) {
+			Logger.error("populateWithTextSdtBlock: null SdtBlock");
+			return;
+		}
+
+		if (textValue == null) {
+			textValue = "";
+		}
+		textValue = textValue.replace("\r\n", "\n").replace("\r", "\n");
+		String[] lines = textValue.split("\n"); // empty line means new paragraph
+		P referenceP = findFirstChildParagraphInSdtElement(sdtBlock);
+		if (referenceP == null) {
+			Logger.error("populateWithTextSdtBlock: SdtBlock paragraph is missing!");
+			return;
+		}
+		R referenceR = findFirstChildRunInParagrph(referenceP);
+
+		sdtBlock.getSdtContent().getContent().clear();
+
+		P currentP = null;
+		for (String line : lines) {
+			if (currentP == null || line.isEmpty()) {
+				currentP = createP(sdtBlock.getSdtContent(), referenceP);
+				sdtBlock.getSdtContent().getContent().add(currentP);
+			}
+			if (!currentP.getContent().isEmpty() && !line.isEmpty()) {
+				R newLineR = createNewLineR(currentP);
+				currentP.getContent().add(newLineR);
+			}
+
+			R rWithText = createR(currentP, referenceR, line);
+			currentP.getContent().add(rWithText);
+
+			if (line.isEmpty())
+				currentP = null;
+		}
+	}
+
+	private static P createP(Object parent, P referenceP) {
+		P p = new P();
+		if (referenceP != null) {
+			PPr ppr = new PPr();
+			ppr.setPStyle(referenceP.getPPr().getPStyle());
+			p.setPPr(ppr);
+		}
+		p.setParent(parent);
+		return p;
+	}
+
+	private static R createR(Object parent, R referenceR, String contentText) {
+		if (contentText == null)
+			contentText = "";
+		R r = new R();
+		if (referenceR != null) {
+			RPr rpr = new RPr();
+			rpr.setRFonts(referenceR.getRPr().getRFonts());
+			rpr.setRStyle(null);
+			r.setRPr(rpr);
+		}
+		r.setParent(parent);
+
+		Text text = new Text();
+		text.setParent(r);
+		r.getContent().add(text);
+
+		text.setValue(contentText);
+		return r;
+	}
+
+	private static R createNewLineR(Object parent) {
+		R r = new R();
+		r.setParent(parent);
+		Br br = new Br();
+		br.setParent(r);
+		r.getContent().add(br);
+		return r;
 	}
 
 	private static void populateWithTextSdtRun(SdtRun sdtRun, String textValue) {
@@ -208,8 +306,9 @@ public class WordContentControlPopulatorUtil {
 									tag);
 						}
 						String textValue = dtos.get(0).getValue();
-						if (textValue != null && !textValue.isEmpty())
-							populateWithText(sdtElement, textValue);
+						if (textValue == null)
+							textValue = "";
+						populateWithText(sdtElement, textValue);
 					}
 
 					// childDTOs = dtoContent.get(tag).getChildren();
