@@ -6,10 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.docx4j.Docx4J;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -180,6 +182,7 @@ public class WordContentControlPopulatorUtil {
 		if (sdtElement instanceof CTSdtCell) {
 			populateWithTextSdtCell((CTSdtCell) sdtElement, textValue);
 		} else if (sdtElement instanceof CTSdtRow) {
+			throw new NotImplementedException("populate CTSdtRow is not implemented!");
 		} else if (sdtElement instanceof SdtBlock) {
 			populateWithTextSdtBlock((SdtBlock) sdtElement, textValue);
 		} else if (sdtElement instanceof SdtRun) {
@@ -344,22 +347,52 @@ public class WordContentControlPopulatorUtil {
 		firstTextInRun.setValue(textValue);
 	}
 
+	private static int getNumberOfRepeatedItemsFromDTO(ContentControlValuesDTO repeatingDTO) {
+		if (repeatingDTO == null || repeatingDTO.getChildren() == null)
+			return 0;
+
+		int minNumber = Integer.MAX_VALUE;
+		for (String key : repeatingDTO.getChildren().keySet()) {
+			List<ContentControlValuesDTO> children = repeatingDTO.getChildren().get(key);
+			int num = children.size();
+
+			if (num < minNumber)
+				minNumber = num;
+		}
+		return minNumber;
+	}
+
 	private static void populateDocumentRecursive(List<Object> docElementContent,
-			Map<String, List<ContentControlValuesDTO>> dtoContent) {
+			Map<String, List<ContentControlValuesDTO>> dtoContent, boolean parenSdtIsRepeatingSectionItem,
+			Map<String, Integer> repeatingSectionitemIndexMap) {
 		if (docElementContent == null || dtoContent == null)
 			return;
+		Map<String, Integer> repeatingSectionitemIndexMapForNextGeneration = repeatingSectionitemIndexMap;
 
-		for (Object object : docElementContent) {
+		for (int i = 0; i < docElementContent.size(); i++) {
+			Object object = docElementContent.get(i);
 			if (object instanceof JAXBElement<?>) {
 				object = ((JAXBElement<?>) object).getValue();
 			}
 			// System.out.println(object.getClass().getSimpleName());
+			boolean forNextGenerationIsSdtRepeatingSectionItem = parenSdtIsRepeatingSectionItem;
 
 			List<Object> childContent = null;
 			Map<String, List<ContentControlValuesDTO>> childDTOs = null;
+
 			if (object instanceof SdtElement) {
 				SdtElement sdtElement = (SdtElement) object;
 				String tag = WordContentControlAnalayzerUtil.getSdtTag(sdtElement);
+
+				int repeatingSectionitemIndex = 0;
+				if (!tag.isEmpty()) {
+					if (repeatingSectionitemIndexMap != null) {
+						if (repeatingSectionitemIndexMap.get(tag) != null)
+							repeatingSectionitemIndex = repeatingSectionitemIndexMap.get(tag);
+						else
+							repeatingSectionitemIndexMap.put(tag, repeatingSectionitemIndex);
+					}
+				}
 
 				childContent = sdtElement.getSdtContent().getContent();
 
@@ -367,8 +400,14 @@ public class WordContentControlPopulatorUtil {
 				String name = WordContentControlAnalayzerUtil.getSdtName(sdtElement);
 				// System.out.println("Name: " + name);
 				boolean isRepeatingSection = WordContentControlAnalayzerUtil.isW15RepeatingSection(sdtElement);
+				if (isRepeatingSection) {
+					repeatingSectionitemIndexMapForNextGeneration = new HashMap<String, Integer>();
+				}
 				// System.out.println("isRepeatingSection: " + isRepeatingSection);
 				boolean isRepeatingSectionItem = WordContentControlAnalayzerUtil.isW15RepeatingSectionItem(sdtElement);
+
+				forNextGenerationIsSdtRepeatingSectionItem = isRepeatingSectionItem;
+
 				// System.out.println("isRepatingSectionItem: " + isRepeatingSectionItem);
 				boolean isMultiParagraph = WordContentControlAnalayzerUtil.isMultipleParagraph(sdtElement);
 				System.out.println("MultiParagraph: " + isMultiParagraph);
@@ -379,20 +418,44 @@ public class WordContentControlPopulatorUtil {
 						continue;
 
 					if (isRepeatingSection) {
-
-					} else {
-						if (dtos.size() > 1) {
-							Logger.error(
-									"For label {} there are multiple entries for non repeating section. Extra will be ignored!",
-									tag);
+						int expectedNumber = getNumberOfRepeatedItemsFromDTO(dtos.get(0));
+						int haveNumber = childContent.size();
+						int toAddNumber = expectedNumber - haveNumber;
+						if (haveNumber > 0) {
+							Object repeatItemObj = childContent.getFirst();
+							if (repeatItemObj instanceof SdtElement) {
+								SdtElement repeatItem = (SdtElement) repeatItemObj;
+								if (WordContentControlAnalayzerUtil.isW15RepeatingSectionItem(repeatItem)) {
+									for (int j = 0; j < toAddNumber; j++) {
+										SdtElement repeatItemCopy = XmlUtils.deepCopy(repeatItem);
+										childContent.add(repeatItemCopy);
+										System.out.println("Add copy");
+									}
+								}
+							}
 						}
-						String textValue = dtos.get(0).getValue();
+
+					} else if (dtos.size() >= (repeatingSectionitemIndex + 1)) {
+
+						String textValue = dtos.get(repeatingSectionitemIndex).getValue();
 						if (textValue == null)
 							textValue = "";
 						populateWithText(sdtElement, textValue);
 					}
 
-					// childDTOs = dtoContent.get(tag).getChildren();
+					if (dtos.size() >= (repeatingSectionitemIndex + 1)) {
+						childDTOs = dtos.get(repeatingSectionitemIndex).getChildren();
+					}
+				}
+
+				if (parenSdtIsRepeatingSectionItem) {
+					repeatingSectionitemIndex++;
+					if (!tag.isEmpty()) {
+						if (repeatingSectionitemIndexMapForNextGeneration != null) {
+							repeatingSectionitemIndexMapForNextGeneration.put(tag, repeatingSectionitemIndex);
+						}
+					}
+
 				}
 
 			} else if (object instanceof ContentAccessor) {
@@ -401,9 +464,11 @@ public class WordContentControlPopulatorUtil {
 			}
 
 			if (childContent != null && childDTOs == null)
-				populateDocumentRecursive(childContent, dtoContent);
+				populateDocumentRecursive(childContent, dtoContent, forNextGenerationIsSdtRepeatingSectionItem,
+						repeatingSectionitemIndexMapForNextGeneration);
 			else if (childContent != null && childDTOs != null)
-				populateDocumentRecursive(childContent, childDTOs);
+				populateDocumentRecursive(childContent, childDTOs, forNextGenerationIsSdtRepeatingSectionItem,
+						repeatingSectionitemIndexMapForNextGeneration);
 		}
 	}
 
@@ -426,14 +491,16 @@ public class WordContentControlPopulatorUtil {
 		}
 
 		for (JaxbXmlPart headerPart : headerParts) {
-			populateDocumentRecursive(((ContentAccessor) headerPart.getContents()).getContent(), dtoContent);
+			populateDocumentRecursive(((ContentAccessor) headerPart.getContents()).getContent(), dtoContent, false,
+					null);
 		}
 		// get main part placeholders
-		populateDocumentRecursive(mainDocumentPart.getContent(), dtoContent);
+		populateDocumentRecursive(mainDocumentPart.getContent(), dtoContent, false, null);
 
 		// get footer placeholders
 		for (JaxbXmlPart footerPart : footerParts) {
-			populateDocumentRecursive(((ContentAccessor) footerPart.getContents()).getContent(), dtoContent);
+			populateDocumentRecursive(((ContentAccessor) footerPart.getContents()).getContent(), dtoContent, false,
+					null);
 		}
 	}
 }

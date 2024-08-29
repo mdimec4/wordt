@@ -262,7 +262,37 @@ public class WordContentControlAnalayzerUtil {
 				+ "na travniku sedi\n" //
 				+ "in se veseli!");
 		toPupulateDTOs.put(richCc.getLabel(), List.of(richCc));
-
+		
+		ContentControlValuesDTO simpleCc = new ContentControlValuesDTO();
+		simpleCc.setLabel("SIMPLE_ONE");
+		simpleCc.setValue("Love");
+		toPupulateDTOs.put(simpleCc.getLabel(), List.of(simpleCc));
+		
+		
+		/// repeating
+		ContentControlValuesDTO repeatingCc = new ContentControlValuesDTO();
+		repeatingCc.setLabel("REPEATING");
+		toPupulateDTOs.put(repeatingCc.getLabel(), List.of(repeatingCc));
+		
+		ContentControlValuesDTO childComplexCc1 = new ContentControlValuesDTO();
+		childComplexCc1.setLabel("CHILD_COMPLEX");
+		childComplexCc1.setValue("ch complex 1");
+		
+		ContentControlValuesDTO childComplexCc2 = new ContentControlValuesDTO();
+		childComplexCc2.setLabel("CHILD_COMPLEX");
+		childComplexCc2.setValue("ch complex 2");
+		repeatingCc.getChildren().put(childComplexCc2.getLabel(), List.of(childComplexCc1 ,childComplexCc2));
+		
+		ContentControlValuesDTO childSimpleCc1 = new ContentControlValuesDTO();
+		childSimpleCc1.setLabel("CHILD_SIMPLE");
+		childSimpleCc1.setValue("ch simple 1");
+		
+		ContentControlValuesDTO childSimpleCc2 = new ContentControlValuesDTO();
+		childSimpleCc2.setLabel("CHILD_SIMPLE");
+		childSimpleCc2.setValue("ch simple 2");
+		repeatingCc.getChildren().put(childSimpleCc2.getLabel(), List.of(childSimpleCc1 ,childSimpleCc2));
+		////
+		
 		ContentControlValuesDTO tabela1Cc = new ContentControlValuesDTO();
 		tabela1Cc.setLabel("TABELA1");
 		tabela1Cc.setValue("Muc je muc");
