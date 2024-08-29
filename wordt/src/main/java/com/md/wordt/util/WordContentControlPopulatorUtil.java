@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.docx4j.Docx4J;
+import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.JaxbXmlPart;
@@ -264,8 +265,7 @@ public class WordContentControlPopulatorUtil {
 	private static P createP(Object parent, P referenceP) {
 		P p = new P();
 		if (referenceP != null) {
-			PPr ppr = referenceP.getPPr(); // XXX object is shared not ideal: there will be impossible to modify just
-											// modify one paragraph without modifying others
+			PPr ppr = XmlUtils.deepCopy(referenceP.getPPr());
 			p.setPPr(ppr);
 		}
 		p.setParent(parent);
@@ -277,8 +277,7 @@ public class WordContentControlPopulatorUtil {
 			contentText = "";
 		R r = new R();
 		if (referenceR != null) {
-			RPr rpr = referenceR.getRPr(); // XXX object is shared not ideal: there will be impossible to modify just
-											// modify one run without modifying others
+			RPr rpr = XmlUtils.deepCopy(referenceR.getRPr());
 			rpr.setRStyle(null);
 
 			r.setRPr(rpr);
