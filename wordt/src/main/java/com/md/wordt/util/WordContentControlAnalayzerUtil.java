@@ -73,6 +73,8 @@ public class WordContentControlAnalayzerUtil {
 		Optional<org.docx4j.wml.SdtPr.Alias> aliasOpt = sdtElement.getSdtPr().getRPrOrAliasOrLock() //
 				.stream() //
 				.filter(o -> {
+					if (o instanceof org.docx4j.wml.SdtPr.Alias)
+						return true;
 					if (!(o instanceof JAXBElement<?>))
 						return false;
 					JAXBElement<?> j = (JAXBElement<?>) o;
@@ -84,6 +86,8 @@ public class WordContentControlAnalayzerUtil {
 
 				}) //
 				.map(o -> {
+					if (o instanceof org.docx4j.wml.SdtPr.Alias)
+						return (org.docx4j.wml.SdtPr.Alias) o;
 					JAXBElement<org.docx4j.wml.SdtPr.Alias> j = (JAXBElement<org.docx4j.wml.SdtPr.Alias>) o;
 					return j.getValue();
 				}) //
