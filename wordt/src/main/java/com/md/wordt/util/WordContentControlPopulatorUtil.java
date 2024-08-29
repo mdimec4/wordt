@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.docx4j.Docx4J;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -182,7 +181,7 @@ public class WordContentControlPopulatorUtil {
 		if (sdtElement instanceof CTSdtCell) {
 			populateWithTextSdtCell((CTSdtCell) sdtElement, textValue);
 		} else if (sdtElement instanceof CTSdtRow) {
-			throw new NotImplementedException("populate CTSdtRow is not implemented!");
+			Logger.error("populateWithText: CTSdtRow was not expected here!");
 		} else if (sdtElement instanceof SdtBlock) {
 			populateWithTextSdtBlock((SdtBlock) sdtElement, textValue);
 		} else if (sdtElement instanceof SdtRun) {
@@ -375,6 +374,7 @@ public class WordContentControlPopulatorUtil {
 				object = ((JAXBElement<?>) object).getValue();
 			}
 			// System.out.println(object.getClass().getSimpleName());
+
 			boolean forNextGenerationIsSdtRepeatingSectionItem = parenSdtIsRepeatingSectionItem;
 
 			List<Object> childContent = null;
@@ -397,7 +397,7 @@ public class WordContentControlPopulatorUtil {
 				childContent = sdtElement.getSdtContent().getContent();
 
 				System.out.println("Tag: " + tag);
-				String name = WordContentControlAnalayzerUtil.getSdtName(sdtElement);
+				// String name = WordContentControlAnalayzerUtil.getSdtName(sdtElement);
 				// System.out.println("Name: " + name);
 				boolean isRepeatingSection = WordContentControlAnalayzerUtil.isW15RepeatingSection(sdtElement);
 				if (isRepeatingSection) {
@@ -408,9 +408,10 @@ public class WordContentControlPopulatorUtil {
 
 				forNextGenerationIsSdtRepeatingSectionItem = isRepeatingSectionItem;
 
-				// System.out.println("isRepatingSectionItem: " + isRepeatingSectionItem);
-				boolean isMultiParagraph = WordContentControlAnalayzerUtil.isMultipleParagraph(sdtElement);
-				System.out.println("MultiParagraph: " + isMultiParagraph);
+				System.out.println("isRepatingSectionItem: " + isRepeatingSectionItem);
+				// boolean isMultiParagraph =
+				// WordContentControlAnalayzerUtil.isMultipleParagraph(sdtElement);
+				// System.out.println("MultiParagraph: " + isMultiParagraph);
 
 				if (!tag.isEmpty()) {
 					List<ContentControlValuesDTO> dtos = dtoContent.get(tag);
@@ -422,15 +423,14 @@ public class WordContentControlPopulatorUtil {
 						int haveNumber = childContent.size();
 						int toAddNumber = expectedNumber - haveNumber;
 						if (haveNumber > 0) {
-							Object repeatItemObj = childContent.getFirst();
-							if (repeatItemObj instanceof SdtElement) {
-								SdtElement repeatItem = (SdtElement) repeatItemObj;
-								if (WordContentControlAnalayzerUtil.isW15RepeatingSectionItem(repeatItem)) {
-									for (int j = 0; j < toAddNumber; j++) {
-										SdtElement repeatItemCopy = XmlUtils.deepCopy(repeatItem);
-										childContent.add(repeatItemCopy);
-										System.out.println("Add copy");
-									}
+							SdtElement repeatItem = WordContentControlAnalayzerUtil
+									.findRepeatingSectionItemChild(sdtElement);
+
+							if (repeatItem != null) {
+								for (int j = 0; j < toAddNumber; j++) {
+									SdtElement repeatItemCopy = XmlUtils.deepCopy(repeatItem);
+									childContent.add(repeatItemCopy);
+									System.out.println("Add copy");
 								}
 							}
 						}

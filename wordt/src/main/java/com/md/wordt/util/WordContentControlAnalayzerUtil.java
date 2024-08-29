@@ -50,8 +50,16 @@ public class WordContentControlAnalayzerUtil {
 	}
 
 	public static String getSdtTag(SdtElement sdtElement) {
+		@SuppressWarnings("rawtypes")
 		Optional<Object> tagObjOpt = sdtElement.getSdtPr().getRPrOrAliasOrLock() //
-				.stream().filter(o -> (o instanceof Tag)) //
+				.stream() //
+				.map(o -> {
+					if (o instanceof JAXBElement) {
+						return ((JAXBElement) o).getValue();
+					}
+					return o;
+				}) //
+				.filter(o -> (o instanceof Tag)) //
 				.findFirst();
 
 		if (tagObjOpt.isEmpty())
@@ -83,6 +91,29 @@ public class WordContentControlAnalayzerUtil {
 		if (aliasOpt.isEmpty())
 			return "";
 		return aliasOpt.get().getVal();
+	}
+
+	public static SdtElement findRepeatingSectionItemChild(SdtElement sdtElement) {
+		if (sdtElement == null)
+			return null;
+		@SuppressWarnings("rawtypes")
+		Optional<SdtElement> repeatItemOpt = sdtElement.getSdtContent().getContent() //
+				.stream() //
+				.map(o -> {
+					if (o instanceof JAXBElement) {
+						return ((JAXBElement) o).getValue();
+					}
+					return o;
+				}) //
+				.filter(o -> (o instanceof SdtElement)) //
+				.map(o -> ((SdtElement) o)) //
+				.filter(s -> WordContentControlAnalayzerUtil.isW15RepeatingSectionItem(s)) //
+				.findFirst();
+
+		if (repeatItemOpt.isEmpty())
+			return null;
+
+		return repeatItemOpt.get();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -262,37 +293,36 @@ public class WordContentControlAnalayzerUtil {
 				+ "na travniku sedi\n" //
 				+ "in se veseli!");
 		toPupulateDTOs.put(richCc.getLabel(), List.of(richCc));
-		
+
 		ContentControlValuesDTO simpleCc = new ContentControlValuesDTO();
 		simpleCc.setLabel("SIMPLE_ONE");
 		simpleCc.setValue("Love");
 		toPupulateDTOs.put(simpleCc.getLabel(), List.of(simpleCc));
-		
-		
+
 		/// repeating
 		ContentControlValuesDTO repeatingCc = new ContentControlValuesDTO();
 		repeatingCc.setLabel("REPEATING");
 		toPupulateDTOs.put(repeatingCc.getLabel(), List.of(repeatingCc));
-		
+
 		ContentControlValuesDTO childComplexCc1 = new ContentControlValuesDTO();
 		childComplexCc1.setLabel("CHILD_COMPLEX");
 		childComplexCc1.setValue("ch complex 1");
-		
+
 		ContentControlValuesDTO childComplexCc2 = new ContentControlValuesDTO();
 		childComplexCc2.setLabel("CHILD_COMPLEX");
 		childComplexCc2.setValue("ch complex 2");
-		repeatingCc.getChildren().put(childComplexCc2.getLabel(), List.of(childComplexCc1 ,childComplexCc2));
-		
+		repeatingCc.getChildren().put(childComplexCc2.getLabel(), List.of(childComplexCc1, childComplexCc2));
+
 		ContentControlValuesDTO childSimpleCc1 = new ContentControlValuesDTO();
 		childSimpleCc1.setLabel("CHILD_SIMPLE");
 		childSimpleCc1.setValue("ch simple 1");
-		
+
 		ContentControlValuesDTO childSimpleCc2 = new ContentControlValuesDTO();
 		childSimpleCc2.setLabel("CHILD_SIMPLE");
 		childSimpleCc2.setValue("ch simple 2");
-		repeatingCc.getChildren().put(childSimpleCc2.getLabel(), List.of(childSimpleCc1 ,childSimpleCc2));
+		repeatingCc.getChildren().put(childSimpleCc2.getLabel(), List.of(childSimpleCc1, childSimpleCc2));
 		////
-		
+
 		ContentControlValuesDTO tabela1Cc = new ContentControlValuesDTO();
 		tabela1Cc.setLabel("TABELA1");
 		tabela1Cc.setValue("Muc je muc");
