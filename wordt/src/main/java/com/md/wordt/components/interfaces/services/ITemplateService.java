@@ -8,5 +8,8 @@ import com.md.wordt.dto.GeneratedDocumentHolderInternalDTO;
 
 public interface ITemplateService {
 	ContentControlStructureWrapDTO getDocumentStructure(MultipartFile document);
+
 	GeneratedDocumentHolderInternalDTO populateDocument(ContentControlValuesWrapDTO values);
+
+	void abortAndDelete(String documentRayToken);
 }
