@@ -28,8 +28,8 @@ import org.docx4j.wml.SdtElement;
 import org.docx4j.wml.SdtRun;
 import org.docx4j.wml.Tag;
 
-import com.md.wordt.dto.ContentControlStructureDTO;
-import com.md.wordt.dto.ContentControlValuesDTO;
+import com.md.wordt.dto.util.ContentControlStructureDTO;
+import com.md.wordt.dto.util.ContentControlValuesDTO;
 
 import jakarta.xml.bind.JAXBElement;
 

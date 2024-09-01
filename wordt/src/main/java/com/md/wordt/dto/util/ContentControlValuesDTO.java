@@ -1,4 +1,4 @@
-package com.md.wordt.dto;
+package com.md.wordt.dto.util;
 
 import java.util.HashMap;
 import java.util.List;

@@ -35,7 +35,7 @@ import org.docx4j.wml.Tc;
 import org.docx4j.wml.Text;
 import org.tinylog.Logger;
 
-import com.md.wordt.dto.ContentControlValuesDTO;
+import com.md.wordt.dto.util.ContentControlValuesDTO;
 
 import jakarta.xml.bind.JAXBElement;
 

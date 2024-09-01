@@ -1,4 +1,4 @@
-package com.md.wordt.dto;
+package com.md.wordt.dto.util;
 
 import java.util.ArrayList;
 import java.util.List;
