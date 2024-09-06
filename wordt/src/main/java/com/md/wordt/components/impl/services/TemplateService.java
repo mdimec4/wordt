@@ -1,6 +1,5 @@
 package com.md.wordt.components.impl.services;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
@@ -13,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.docx4j.Docx4J;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.io.LoadFromZipNG.ByteArray;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -104,19 +102,21 @@ public class TemplateService implements ITemplateService {
 		WordprocessingMLPackage documentClone = (WordprocessingMLPackage) storedDocument.document.clone();
 
 		WordContentControlPopulatorUtil ccPopulator = new WordContentControlPopulatorUtil(documentClone);
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		try {
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream();) {
 			ccPopulator.populateDocument(values.getValues());
 			ccPopulator.save(bos);
-		} catch (Docx4JException e) {
+
+			String outFileName = generateOutputFileName(storedDocument.fileName);
+
+			GeneratedDocumentHolderInternalDTO dto = new GeneratedDocumentHolderInternalDTO();
+			dto.setDocumentData(bos.toByteArray());
+			dto.setFilename(outFileName);
+
+			return dto;
+		} catch (Docx4JException | IOException e) {
 			Logger.error(e);
 			throw new InternalException("Error while populating or generating a document!");
 		}
-		
-		String outFileName = generateOutputFileName(storedDocument.fileName);
-
-		// TODO: pack result in DTO
-		return null;
 	}
 
 	@Override
@@ -154,19 +154,19 @@ public class TemplateService implements ITemplateService {
 
 		return generatedString + Long.toHexString(nano);
 	}
-	
+
 	private String generateOutputFileName(String fileName) {
-		if(fileName == null || fileName.isEmpty())
+		if (fileName == null || fileName.isEmpty())
 			return "document.docx";
-		
+
 		String generatedString = RandomStringUtils.random(4, true, true);
 		Instant now = Instant.now();
 		long nano = (now.getEpochSecond() * 1_000_000_000) + now.getNano();
 		String unique = generatedString + Long.toHexString(nano);
-		
+
 		int index = fileName.lastIndexOf(".");
-		
-		return fileName.substring(0, index -1) + "_" + unique + ".docx";
+
+		return fileName.substring(0, index - 1) + "_" + unique + ".docx";
 	}
 
 	private class StoredDocument {
