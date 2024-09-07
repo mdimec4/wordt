@@ -7,7 +7,6 @@ import com.md.wordt.dto.util.ContentControlStructureDTO;
 
 public class ContentControlStructureWrapDTO {
 	private String documentRayToken;
-	private String error;
 
 	private List<ContentControlStructureDTO> structure = Collections.emptyList();
 
@@ -17,14 +16,6 @@ public class ContentControlStructureWrapDTO {
 
 	public void setDocumentRayToken(String documentRayToken) {
 		this.documentRayToken = documentRayToken;
-	}
-
-	public String getError() {
-		return error;
-	}
-
-	public void setError(String error) {
-		this.error = error;
 	}
 
 	public List<ContentControlStructureDTO> getStructure() {
