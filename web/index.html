@@ -45,6 +45,17 @@
 	</div>
 	
 	<div id="inputs_screen" style="visibility: hidden">
+		<div id="inputs_screen_err" style="color: red"></div>
+	    
+		<div>
+		    <form method="post" enctype="multipart/form-data" id="inputs_form">
+				<div id="inputs_root">
+				</div>
+
+			    <button>Cancel</button>
+				<button>Download</button>
+            </form>
+		</div>
 	</div>
 
 
@@ -73,14 +84,17 @@
 			    return;
 		    }
 			
-			showInputsScreen(json);
+			if (json.structure)
+			    showInputsScreen(json);
+			else if (json.error) {
+			    showUploadScreen();
+			    document.getElementById("upload_screen_err").innerHTML = json.error;
+			}
 		} catch (error) {
 		    console.log(error);
 			showUploadScreen();
 			document.getElementById("upload_screen_err").innerHTML = error;
 		}
-		 
-
     }
 	
 	function showUploadScreen() {
@@ -100,10 +114,48 @@
 		document.getElementById("upload_screen").style = "visibility: hidden";
 		document.getElementById("loading_screen").style = "visibility: hidden";
 		document.getElementById("inputs_screen").style = "visibility: visible";
+		document.getElementById("inputs_screen_err").innerHTML = "";
+		
+		const inputsRoot = document.getElementById("inputs_root");
+		if (!inputsRoot) {
+		    console.log("Can't find: inputs_root");
+			return;
+		}
+		recursiveFormImputs(inputsRoot, json.structure);
 	}
 
-	function recursiveFormImputs(structure) {
-	    // TODO
+	function recursiveFormImputs(element, structure) {
+	    for (i = 0; i < structure.length; i++) {
+			const inpEl = createStructureElement(structure[i]);
+			element.appendChild(inpEl);
+			
+			const divForChildren = document.createElement("div");
+			recursiveFormImputs(divForChildren, structure[i].children)
+		}
+	}
+	
+	function createStructureElement(structureElement) {
+		const div = document.createElement("div");
+		div.tag = structureElement;
+		
+		const label = document.createElement("label");
+		 label.innerHTML = structureElement.name ? (structureElement.name + " (" + structureElement.tag + ")") : structureElement.tag;
+         div.appendChild(label);
+		 
+		 if (structureElement.multiParagraph) {
+		     const textArea = document.createElement("textarea");
+			 div.appendChild(textArea);
+		 } else {
+			const input = document.createElement("input");
+			input.type = "text";
+			div.appendChild(input);
+		 }
+		 
+		 if (structureElement.repeating) {
+		    const addBtn = document.createElement("button");
+			addBtn.innerHTML = "Add";
+		    div.appendChild(addBtn);
+		}
 	}
 
 	</script>
