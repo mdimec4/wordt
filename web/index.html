@@ -133,14 +133,16 @@
 			
 			
 			if (structure[i].repeating) {
+				const div = document.createElement("div");
+				div.style = "margin-left: 30px";
+				element.appendChild(div);
 				const divForChildren = document.createElement("div");
-				divForChildren.style = "margin-left: 10px";
 				recursiveFormImputs(divForChildren, structure[i].children);
-				element.appendChild(divForChildren);
+				div.appendChild(divForChildren);
 				
 				const addBtn = document.createElement("button");
 				addBtn.innerHTML = "Add";
-				divForChildren.appendChild(addBtn);
+				div.appendChild(addBtn);
 			}
 		}
 	}
@@ -157,10 +159,14 @@
 		if (structureElement.repeating) {
             return div;
 		}
-		 		 
+
+		const br = document.createElement("br");
+		div.appendChild(br);
 
 		if (structureElement.multiParagraph) {
 		    const textArea = document.createElement("textarea");
+			textArea.cols = 70;
+			textArea.rows = 10;
 			div.appendChild(textArea);
 		} else {
 			const input = document.createElement("input");
