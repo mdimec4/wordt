@@ -205,7 +205,7 @@ public class WordContentControlAnalayzerUtil {
 
 				boolean isMultiParagraph = isMultipleParagraph(sdtElement);
 
-				System.out.println("MultiParagraph: " + isMultiParagraph);
+				// System.out.println("MultiParagraph: " + isMultiParagraph);
 
 				if (!tag.isEmpty()) {
 					ContentControlStructureDTO dto = new ContentControlStructureDTO();

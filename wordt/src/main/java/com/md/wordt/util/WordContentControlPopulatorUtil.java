@@ -430,7 +430,7 @@ public class WordContentControlPopulatorUtil {
 								for (int j = 0; j < toAddNumber; j++) {
 									SdtElement repeatItemCopy = XmlUtils.deepCopy(repeatItem);
 									childContent.add(repeatItemCopy);
-									System.out.println("Add copy");
+									// System.out.println("Add copy");
 								}
 							}
 						}

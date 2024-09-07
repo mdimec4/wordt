@@ -28,7 +28,7 @@ public class TemplateController {
 	private ITemplateService templateService;
 
 	@RequestMapping(value = "/upload", method = RequestMethod.POST, consumes = {
-			"application/vnd.openxmlformats-officedocument.wordprocessingml.document" }, produces = {
+			MediaType.MULTIPART_FORM_DATA_VALUE }, produces = {
 					MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> getDocumentStructure(@RequestParam("file") MultipartFile document) {
 		try {
