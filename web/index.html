@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+       body {
+           background-color: lightblue;
+       }
+	   
+	   .container {
+           width: 100%;
+           height: 100%;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+        }
+
+        .container img {
+            width: 100px;
+            height: 100px;
+        }
+
+	</style>
+</head>
+<body>
+	<h1>DocxT</h1>
+	
+    <div id="upload_screen" style="visibility: visible" class="container">
+	    <form method="post" enctype="multipart/form-data" id="upload_form">
+            <label for="file">Select docx template:</label>
+            <input id="file" name="file" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+            <br />
+			<button>Upload</button>
+        </form>
+
+	</div>
+		
+	<div id="loading_screen" style="visibility: hidden" class="container">
+	    <img src="loading.gif" alt="loading" />
+	</div>
+	
+	<div id="inputs_screen" style="visibility: hidden" class="container">
+	</div>
+
+
+    <script>
+	const apiLocation = "http://localhost:8080"
+	
+    const form = document.getElementById("upload_form");
+    form.addEventListener('submit', handleSubmit);
+
+     /** @param {Event} event */
+    function handleSubmit(event) {
+		document.getElementById("upload_screen").style = "visibility: hidden";
+		document.getElementById("loading_screen").style = "visibility: visible";
+        
+		//const form = event.currentTarget
+		
+        const fetchOptions = {
+            method: "post",
+        };
+
+        fetch(apiLocation + "/docx_template/upload", fetchOptions);
+		 
+		
+
+		
+		event.preventDefault();
+    }
+
+	</script>
+</body>
+</html>
