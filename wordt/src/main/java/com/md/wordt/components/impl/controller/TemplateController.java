@@ -42,7 +42,7 @@ public class TemplateController {
 			ErrorDTO errDto = new ErrorDTO();
 			errDto.setError(ErrorDTO.InternalServerError);
 			Logger.warn(e.getMessage());
-			return new ResponseEntity<>(errDto, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(errDto, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -66,7 +66,7 @@ public class TemplateController {
 			ErrorDTO errDto = new ErrorDTO();
 			errDto.setError(ErrorDTO.InternalServerError);
 			Logger.warn(e.getMessage());
-			return new ResponseEntity<>(errDto, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(errDto, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -84,7 +84,7 @@ public class TemplateController {
 			ErrorDTO errDto = new ErrorDTO();
 			errDto.setError(ErrorDTO.InternalServerError);
 			Logger.warn(e.getMessage());
-			return new ResponseEntity<>(errDto, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(errDto, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

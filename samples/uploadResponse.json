@@ -1,0 +1,76 @@
+{
+    "documentRayToken": "RM3Hzxs96xtVKBvTWJPyP17f2e9dda2900dc0",
+    "structure": [
+        {
+            "tag": "HEADER",
+            "name": "Header",
+            "repeating": false,
+            "multiParagraph": false,
+            "children": []
+        },
+        {
+            "tag": "RUN",
+            "name": "Run",
+            "repeating": false,
+            "multiParagraph": false,
+            "children": []
+        },
+        {
+            "tag": "RICH_ONE",
+            "name": "Rich one",
+            "repeating": false,
+            "multiParagraph": true,
+            "children": []
+        },
+        {
+            "tag": "SIMPLE_ONE",
+            "name": "SimpleOne",
+            "repeating": false,
+            "multiParagraph": true,
+            "children": []
+        },
+        {
+            "tag": "TABELA1",
+            "name": "tabela1",
+            "repeating": false,
+            "multiParagraph": false,
+            "children": []
+        },
+        {
+            "tag": "TABELA2",
+            "name": "tabela2",
+            "repeating": false,
+            "multiParagraph": false,
+            "children": []
+        },
+        {
+            "tag": "REPEATING",
+            "name": "Repeating",
+            "repeating": true,
+            "multiParagraph": false,
+            "children": [
+                {
+                    "tag": "CHILD_COMPLEX",
+                    "name": "child complex",
+                    "repeating": false,
+                    "multiParagraph": false,
+                    "children": []
+                },
+                {
+                    "tag": "CHILD_SIMPLE",
+                    "name": "child simple",
+                    "repeating": false,
+                    "multiParagraph": false,
+                    "children": []
+                }
+            ]
+        },
+        {
+            "tag": "FOOTER",
+            "name": "Footer",
+            "repeating": false,
+            "multiParagraph": false,
+            "children": []
+        }
+    ]
+}

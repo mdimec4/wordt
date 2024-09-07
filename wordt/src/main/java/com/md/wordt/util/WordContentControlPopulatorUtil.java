@@ -396,7 +396,7 @@ public class WordContentControlPopulatorUtil {
 
 				childContent = sdtElement.getSdtContent().getContent();
 
-				System.out.println("Tag: " + tag);
+				// System.out.println("Tag: " + tag);
 				// String name = WordContentControlAnalayzerUtil.getSdtName(sdtElement);
 				// System.out.println("Name: " + name);
 				boolean isRepeatingSection = WordContentControlAnalayzerUtil.isW15RepeatingSection(sdtElement);
@@ -408,7 +408,7 @@ public class WordContentControlPopulatorUtil {
 
 				forNextGenerationIsSdtRepeatingSectionItem = isRepeatingSectionItem;
 
-				System.out.println("isRepatingSectionItem: " + isRepeatingSectionItem);
+				// System.out.println("isRepatingSectionItem: " + isRepeatingSectionItem);
 				// boolean isMultiParagraph =
 				// WordContentControlAnalayzerUtil.isMultipleParagraph(sdtElement);
 				// System.out.println("MultiParagraph: " + isMultiParagraph);

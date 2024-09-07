@@ -166,7 +166,7 @@ public class TemplateService implements ITemplateService {
 
 		int index = fileName.lastIndexOf(".");
 
-		return fileName.substring(0, index - 1) + "_" + unique + ".docx";
+		return fileName.substring(0, index) + "_" + unique + ".docx";
 	}
 
 	private class StoredDocument {
