@@ -7,7 +7,7 @@
            background-color: lightblue;
        }
 	   
-	   .container {
+	   .container-loading {
            width: 100%;
            height: 100%;
            display: flex;
@@ -15,7 +15,7 @@
            align-items: center;
         }
 
-        .container img {
+        .container-loading img {
             width: 100px;
             height: 100px;
         }
@@ -25,49 +25,82 @@
 <body>
 	<h1>DocxT</h1>
 	
-    <div id="upload_screen" style="visibility: visible" class="container">
-	    <form method="post" enctype="multipart/form-data" id="upload_form">
-            <label for="file">Select docx template</label>
-			<br />
-            <input id="file" name="file" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
-            <br />
-			<button>Upload</button>
-        </form>
-
+    <div id="upload_screen" style="visibility: visible">
+	    
+	    <div id="upload_screen_err" style="color: red"></div>
+	    
+		<div>
+		    <form method="post" enctype="multipart/form-data" id="upload_form">
+                <label for="file">Select docx template</label>
+			    <br />
+                <input id="file" name="file" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+                <br />
+			    <button>Upload</button>
+            </form>
+		</div>
 	</div>
 		
-	<div id="loading_screen" style="visibility: hidden" class="container">
+	<div id="loading_screen" style="visibility: hidden" class="container-loading">
 	    <img src="loading.gif" alt="loading" />
 	</div>
 	
-	<div id="inputs_screen" style="visibility: hidden" class="container">
+	<div id="inputs_screen" style="visibility: hidden">
 	</div>
 
 
     <script>
-	const apiLocation = "http://localhost:8080"
-	
     const form = document.getElementById("upload_form");
-    form.addEventListener('submit', handleSubmit);
+    form.addEventListener('submit', handleSubmitUpload);
 
      /** @param {Event} event */
-    function handleSubmit(event) {
+    async function handleSubmitUpload(event) {
+		event.preventDefault();
+		const form = event.currentTarget
+		
+		showLoadningScreen()
+		try {
+            const fetchOptions = {
+                method: "post",
+			    body: new FormData(form),
+            };
+
+            const response = await fetch("/api/docx_template/upload", fetchOptions);
+		    const json = await response.json();
+		    if (!response.ok) {
+			    showUploadScreen();
+			    if (json != null)
+			        document.getElementById("upload_screen_err").innerHTML = json.error;
+			    return;
+		    }
+			
+			showInputsScreen(json);
+		} catch (error) {
+		    console.log(error);
+			showUploadScreen();
+			document.getElementById("upload_screen_err").innerHTML = error;
+		}
+		 
+
+    }
+	
+	function showUploadScreen() {
+		document.getElementById("upload_screen").style = "visibility: visile";
+		document.getElementById("loading_screen").style = "visibility: hidden";
+		document.getElementById("inputs_screen").style = "visibility: hidden";
+		document.getElementById("upload_screen_err").innerHTML = "";
+	}
+	
+	function showLoadningScreen() {
 		document.getElementById("upload_screen").style = "visibility: hidden";
 		document.getElementById("loading_screen").style = "visibility: visible";
-        
-		//const form = event.currentTarget
-		
-        const fetchOptions = {
-            method: "post",
-        };
-
-        fetch(apiLocation + "/docx_template/upload", fetchOptions);
-		 
-		
-
-		
-		event.preventDefault();
-    }
+		document.getElementById("inputs_screen").style = "visibility: hidden";
+	}
+	
+	function showInputsScreen(json) {
+		document.getElementById("upload_screen").style = "visibility: hidden";
+		document.getElementById("loading_screen").style = "visibility: hidden";
+		document.getElementById("inputs_screen").style = "visibility: visible";
+	}
 
 	</script>
 </body>
