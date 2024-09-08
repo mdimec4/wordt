@@ -121,6 +121,8 @@
 		    console.log("Can't find: inputs_root");
 			return;
 		}
+		inputsRoot.textContent = '';
+		
 		recursiveFormImputs(inputsRoot, json.structure);
 	}
 
