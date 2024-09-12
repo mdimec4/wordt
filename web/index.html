@@ -70,7 +70,7 @@
 		event.preventDefault();
 		const form = event.currentTarget
 		
-		showLoadningScreen()
+		showLoadningScreen();
 		try {
             const fetchOptions = {
                 method: "post",
@@ -114,10 +114,14 @@
 		document.getElementById("inputs_screen").style = "display: none";
 	}
 	
-	function showInputsScreen(json) {
+	function showInputsScreenKeepStateFromBefore() {
 		document.getElementById("upload_screen").style = "display: none";
 		document.getElementById("loading_screen").style = "display: none";
 		document.getElementById("inputs_screen").style = "display: inline";
+	}
+	
+	function showInputsScreen(json) {
+		showInputsScreenKeepStateFromBefore();
 		document.getElementById("inputs_screen_err").textContent = "";
 		
 		const inputsRoot = document.getElementById("inputs_root");
@@ -190,7 +194,7 @@
 		const div = document.createElement("div");
 		div.className = "structElement";
 		div.style = "margin: 10px;"
-		div.tag = structureElement;
+		div.dto = structureElement;
 		
 		const label = document.createElement("label");
 		label.textContent = structureElement.name ? (structureElement.name + " (" + structureElement.tag + "): ") : structureElement.tag + ": ";
@@ -241,7 +245,59 @@
 			document.getElementById("upload_screen_err").textContent = error;
 		}
 	});
-
+	
+	// https://stackoverflow.com/questions/32545632/how-can-i-download-a-file-using-window-fetch
+	const downloadBtn = document.getElementById("inputs-download");
+    downloadBtn.addEventListener('click', async function(event) {
+		event.preventDefault();
+		
+		const inputsRoot = document.getElementById("inputs_root");
+		if (!inputsRoot) {
+		    console.log("Can't find: inputs_root");
+			return;
+		}
+		
+		const dtoObj = {};
+		buildRequestDataFromInputsScreenRecursive(inputsRoot, dtoObj);
+		console.log(JSON.stringify(dtoObj));
+		
+		showLoadningScreen();
+	});
+	
+	function buildRequestDataFromInputsScreenRecursive(element, dtoObj) {
+		if (element.dto) {
+			const label = element.dto.tag;
+			
+			let childrenDtoArray = null;
+			if (dtoObj.hasOwnProperty(label))
+				childrenDtoArray = dtoObj[label];
+			else {
+				childrenDtoArray = [];
+				dtoObj[label] = childrenDtoArray;
+			}
+			const dtoOut = {label: label};
+			childrenDtoArray.push(dtoOut);
+			if (element.dto.children && element.dto.children.length > 0) {
+				dtoOut.children = {};
+				for(let i = 0; i < element.children.length; i++) {
+					buildRequestDataFromInputsScreenRecursive(element.children[i], dtoOut.children);
+				}
+			} else {
+				const textareas = element.getElementsByTagName("textarea");
+				const inputs = element.getElementsByTagName("input");
+				
+				if (textareas && textareas.length > 0) {
+					dtoOut.value = textareas[0].value;
+				} else if (inputs && inputs.length > 0) {
+					dtoOut.value = inputs[0].value;
+				}
+			}
+		} else {
+			for(let i = 0; i < element.children.length; i++) {
+				buildRequestDataFromInputsScreenRecursive(element.children[i], dtoObj);
+			}
+		}
+	}
 	</script>
 </body>
 </html>
