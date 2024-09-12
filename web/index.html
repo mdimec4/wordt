@@ -337,7 +337,7 @@
 	
 	function getFileName(response) {
 		var filename = "";
-		var disposition = response.headers['Content-Disposition'];
+		var disposition = response.headers.get('content-disposition');
 		if (disposition && disposition.indexOf('attachment') !== -1) {
 			var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
 			var matches = filenameRegex.exec(disposition);
