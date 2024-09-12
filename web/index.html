@@ -275,10 +275,19 @@
 
             const response = await fetch("/api/docx_template/populate", fetchOptions);
 		    if (!response.ok) {
-			    showInputsScreenKeepStateFromBefore();
+
 				const json = await response.json();
-			    if (json != null)
-			        document.getElementById("inputs_screen_err").textContent = json.error;
+			    if (json != null) {
+					if (json.error === "Document has expired!" || json.error === "Document not found!") {
+						showUploadScreen();
+						document.getElementById("upload_screen_err").textContent = json.error;
+					} else {
+						showInputsScreenKeepStateFromBefore();
+						document.getElementById("inputs_screen_err").textContent = json.error;
+					}
+					return;
+				}
+				showInputsScreenKeepStateFromBefore();
 			    return;
 		    }
 
