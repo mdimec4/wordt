@@ -52,8 +52,8 @@
 				<div id="inputs_root">
 				</div>
 
-			    <button>Cancel</button>
-				<button>Download</button>
+			    <button id="inputs-cancel">Cancel</button>
+				<button id="inputs-download">Download</button>
             </form>
 		</div>
 	</div>
@@ -123,7 +123,11 @@
 		}
 		inputsRoot.textContent = '';
 		
-		recursiveFormImputs(inputsRoot, json.structure);
+		if (!json || !json.structure || json.structure.length < 1) {
+			inputsRoot.innerHTML = "Uploaded ocument does not contain content control placeholders. Click <a href=\"ccInstructions.html\">here</a> to learn how to create them!";
+		} else {
+			recursiveFormImputs(inputsRoot, json.structure);
+		}
 	}
 
 	function recursiveFormImputs(element, structure) {
