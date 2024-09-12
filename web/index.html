@@ -124,9 +124,11 @@
 		inputsRoot.textContent = '';
 		
 		if (!json || !json.structure || json.structure.length < 1) {
+			document.getElementById("inputs-download").style = "visibility: hidden;";
 			inputsRoot.innerHTML = "Uploaded ocument does not contain content control placeholders. Click <a href=\"ccInstructions.html\">here</a> to learn how to create them!";
 		} else {
 			recursiveFormImputs(inputsRoot, json.structure);
+			document.getElementById("inputs-download").style = "visibility: visible;";
 		}
 	}
 
@@ -183,6 +185,7 @@
 
 		const div = document.createElement("div");
 		div.className = "structElement";
+		div.style = "margin: 10px;"
 		div.tag = structureElement;
 		
 		const label = document.createElement("label");
