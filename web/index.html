@@ -129,18 +129,19 @@
 	function recursiveFormImputs(element, structure) {
 		if (!structure || structure.length < 1)
 			return;
-			
+
 		const levelDiv = document.createElement("div");
 		levelDiv.className = 'levelDiv';
+		levelDiv.style = 'border:1px solid black;';
 		element.appendChild(levelDiv);
-		
+
 	    for (let i = 0; i < structure.length; i++) {
 			const inpEl = createStructureElement(structure[i]);
 			if (!inpEl)
 			    continue;
 			levelDiv.appendChild(inpEl);
-			
-			
+
+
 			if (structure[i].children && structure[i].children.length > 0) {
 				const div = document.createElement("div");
 				div.style = "margin-left: 30px";
@@ -155,10 +156,20 @@
 					const addBtn = document.createElement("button");
 					addBtn.textContent = "Add";
 					div.appendChild(addBtn);
+					
+					addBtn.addEventListener('click', async function(event) {
+						event.preventDefault();
+						recursiveFormImputs(divForChildren, structure[i].children);
+					});
 				
 					const removeBtn = document.createElement("button");
 					removeBtn.textContent = "Remove";
 					div.appendChild(removeBtn);
+					
+					removeBtn.addEventListener('click', async function(event) {
+						event.preventDefault();
+						divForChildren.removeChild(divForChildren.lastChild);
+					});
 				}
 			}
 		}
