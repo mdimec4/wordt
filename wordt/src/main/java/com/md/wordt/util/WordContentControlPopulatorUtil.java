@@ -347,7 +347,7 @@ public class WordContentControlPopulatorUtil {
 	}
 
 	private static int getNumberOfRepeatedItemsFromDTO(ContentControlValuesDTO repeatingDTO) {
-		if (repeatingDTO == null || repeatingDTO.getChildren() == null)
+		if (repeatingDTO == null || repeatingDTO.getChildren() == null || repeatingDTO.getChildren().keySet().isEmpty())
 			return 0;
 
 		int minNumber = Integer.MAX_VALUE;

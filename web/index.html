@@ -171,19 +171,24 @@
 					addBtn.textContent = "Add";
 					div.appendChild(addBtn);
 					
+					const removeBtn = document.createElement("button");
+					removeBtn.textContent = "Remove";
+					removeBtn.disabled = true;
+					div.appendChild(removeBtn);
+
 					addBtn.addEventListener('click', async function(event) {
 						event.preventDefault();
 						recursiveFormImputs(divForChildren, structure[i].children);
+						removeBtn.disabled = false;
 					});
 				
-					const removeBtn = document.createElement("button");
-					removeBtn.textContent = "Remove";
-					div.appendChild(removeBtn);
-					
 					removeBtn.addEventListener('click', async function(event) {
 						event.preventDefault();
-						if (divForChildren.children.length > 0)
+						if (divForChildren.children.length > 1)
 							divForChildren.removeChild(divForChildren.lastChild);
+
+						if (divForChildren.children.length <= 1)
+							removeBtn.disabled = true;
 					});
 				}
 			}
