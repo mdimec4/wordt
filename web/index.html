@@ -250,18 +250,53 @@
 	const downloadBtn = document.getElementById("inputs-download");
     downloadBtn.addEventListener('click', async function(event) {
 		event.preventDefault();
-		
+				
 		const inputsRoot = document.getElementById("inputs_root");
 		if (!inputsRoot) {
 		    console.log("Can't find: inputs_root");
 			return;
 		}
 		
-		const dtoObj = {};
-		buildRequestDataFromInputsScreenRecursive(inputsRoot, dtoObj);
-		console.log(JSON.stringify(dtoObj));
-		
+		document.getElementById("inputs_screen_err").textContent = "";
 		showLoadningScreen();
+		
+		try {
+			const dtoObj = {};
+			buildRequestDataFromInputsScreenRecursive(inputsRoot, dtoObj);
+			
+			
+			const fetchOptions = {
+                method: "post",
+			    body: JSON.stringify({documentRayToken: token ,values: dtoObj}),
+				headers: {
+					"Content-Type": "application/json",
+				},
+            };
+
+            const response = await fetch("/api/docx_template/populate", fetchOptions);
+		    if (!response.ok) {
+			    showInputsScreenKeepStateFromBefore();
+				const json = await response.json();
+			    if (json != null)
+			        document.getElementById("inputs_screen_err").textContent = json.error;
+			    return;
+		    }
+
+			const blob = await response.blob();
+			
+			showInputsScreenKeepStateFromBefore();
+			
+			var a = document.createElement("a");
+			a.href = URL.createObjectURL(blob);
+			a.setAttribute("download", getFileName(response));
+			a.click();
+			
+		} catch (error) {
+		    console.log(error);
+			showInputsScreenKeepStateFromBefore();
+			document.getElementById("inputs_screen_err").textContent = error;
+		}
+		
 	});
 	
 	function buildRequestDataFromInputsScreenRecursive(element, dtoObj) {
@@ -297,6 +332,20 @@
 				buildRequestDataFromInputsScreenRecursive(element.children[i], dtoObj);
 			}
 		}
+	}
+	
+	
+	function getFileName(response) {
+		var filename = "";
+		var disposition = response.headers['Content-Disposition'];
+		if (disposition && disposition.indexOf('attachment') !== -1) {
+			var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+			var matches = filenameRegex.exec(disposition);
+			if (matches != null && matches[1]) { 
+				filename = matches[1].replace(/['"]/g, '');
+			}
+		}
+		return filename;
 	}
 	</script>
 </body>
