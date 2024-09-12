@@ -62,6 +62,8 @@
     <script>
     const form = document.getElementById("upload_form");
     form.addEventListener('submit', handleSubmitUpload);
+	
+	let token = "";
 
      /** @param {Event} event */
     async function handleSubmitUpload(event) {
@@ -84,9 +86,10 @@
 			    return;
 		    }
 			
-			if (json.structure)
+			if (json.structure) {
+				token = json.documentRayToken;
 			    showInputsScreen(json);
-			else if (json.error) {
+			} else if (json.error) {
 			    showUploadScreen();
 			    document.getElementById("upload_screen_err").textContent = json.error;
 			}
@@ -102,6 +105,7 @@
 		document.getElementById("loading_screen").style = "display: none";
 		document.getElementById("inputs_screen").style = "display: none";
 		document.getElementById("upload_screen_err").textContent = "";
+		token = "";
 	}
 	
 	function showLoadningScreen() {
@@ -211,6 +215,32 @@
 		}
 		return div;
 	}
+	
+	const cancelBtn = document.getElementById("inputs-cancel");
+    cancelBtn.addEventListener('click', async function(event) {
+		event.preventDefault();
+		
+		try {
+            const fetchOptions = {
+                method: "delete",
+            };
+
+            const response = await fetch("/api/docx_template/abort?token=" + token, fetchOptions);
+			if (response.ok) {
+				showUploadScreen();
+				return;
+			}
+		    const json = await response.json();
+			if (json.error) {
+			    showUploadScreen();
+			    document.getElementById("upload_screen_err").textContent = json.error;
+			}
+		} catch (error) {
+		    console.log(error);
+			showUploadScreen();
+			document.getElementById("upload_screen_err").textContent = error;
+		}
+	});
 
 	</script>
 </body>
