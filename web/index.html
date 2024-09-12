@@ -182,7 +182,8 @@
 					
 					removeBtn.addEventListener('click', async function(event) {
 						event.preventDefault();
-						divForChildren.removeChild(divForChildren.lastChild);
+						if (divForChildren.children.length > 0)
+							divForChildren.removeChild(divForChildren.lastChild);
 					});
 				}
 			}
