@@ -2,15 +2,57 @@
 <html>
 
 <head>
+	<meta charset="utf-8">
+	<title>docx template populator - instructions</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
        body {
            background-color: lightblue;
        }
-	 <title>docx template populator - instructions</title>
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	</style>
 </head>
 <body>
+<h1>Content Controls</h1>
+
+<img src="ccTransform.gif" alt="transform" width="600px" style="margin: 10px"/>
+
+<section id="enableCC" style="margin: 10px">
+<h2>1. Enable Content Controls in MS Word</h2>
+<p>To  access Content Controls, you will need to enable "Developer" ribbon in MS Word.</p>
+<img src="developer-tab.png" alt="dev ribbon" width="1200px" style="margin: 10px"/>
+
+<p>1. Click "File"</p>
+<img src="developer-tab-step1.png" alt="dev ribbon step 1" width="1200px" style="margin: 10px"/>
+<p>2. Click "Options" (lower left corner)</p>
+<img src="developer-tab-step2.png" alt="dev ribbon step 2" width="100px" style="margin: 10px"/>
+<p>3. Custumize Ribbon -> check "Developer" checkbox -> Ok</p>
+<img src="developer-tab-step3.png" alt="dev ribbon step 3" width="600px" style="margin: 10px"/>
+</section>
+
+<section id="useCC" style="margin: 10px">
+<h2>2. How to use Content Controls in MS Word</h2>
+<p>In this section we will equip a docx template with placeholders for dynamic content. To create those placeholders we will use Content controls</p>
+<p>1. Set the cursor where you want to insert Content Control (optionaly you can select existing text)</p>
+<p>2. Click "Developer" ribbon (To enable it see <a href="#enableCC">previous section</a>)</p>
+<p>3. Click "Rich text" content control ("Plain text" and "Repeating section" content controls are also supported)</p>
+<p><b>Tip:</b> For items that contain multiple entries, use "Repeating content control" (e.g. table rows).</p>
+<p><b>Tip:</b> Content controls can be nested. (e.g. table cell content control inside a row content control)</p>
+<img src="cc-step1.png" alt="content control step 1" width="1200px" style="margin: 10px"/>
+<p>4. Click "Properties".</p>
+<img src="cc-step2.png" alt="content control step 2" width="1200px" style="margin: 10px"/>
+<p>5. "Properties" dialog will open. Here you will set a placeholder tag. This is wery important since we will later reference this placeholder by it's tag.</p>
+<p><b>Tip:</b> Document might contain multiple content controls wit the same tag if the same data needs to be present in multiple places inside the same document!</p>
+<img src="cc-step3.png" alt="content control step 3" width="300px" style="margin: 10px"/>
+<img src="cc-step4.png" alt="content control step 4" width="600px" style="margin: 10px"/>
+<p>6. Upload template inside this tool. And complete the form. Download complete document.</p>
+<p><b>Tip:</b> After downloading the document, you can change the form content and click "Download" again. Downloaded document will contain new data!</p>
+<p><b>Tip:</b> Uploaded document will live inside server memory for one hour after last tuching it! After that time it will be forgoten.</p>
+<img src="cc-step5.png" alt="content control step 5" width="1200px" style="margin: 10px"/>
+<img src="cc-step6.png" alt="content control step 6" width="600px" style="margin: 10px"/>
+</section>
 	
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
