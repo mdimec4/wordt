@@ -169,7 +169,6 @@
 			const inpEl = createStructureElement(structure[i]);
 			if (!inpEl)
 			    continue;
-			containerDiv.appendChild(inpEl);
 
 			let divForUnit = null;
 			let divForInputs = null;
@@ -178,7 +177,15 @@
 				divForInputs = document.createElement("div");
 				divForInputs.className = 'divForInputs';
 				divForUnit.appendChild(divForInputs);
-				inpEl.appendChild(divForUnit);
+				if (structure[i].children.length > 0) {
+					inpEl.appendChild(divForUnit);
+					containerDiv.appendChild(inpEl);
+				} else {
+					containerDiv.appendChild(divForUnit);
+					divForInputs.appendChild(inpEl);
+				}
+			} else {
+				containerDiv.appendChild(inpEl);
 			}
 
 			if (structure[i].children && structure[i].children.length > 0) {
