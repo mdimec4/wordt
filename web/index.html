@@ -159,53 +159,65 @@
 		if (!structure || structure.length < 1)
 			return;
 
-		const levelDiv = document.createElement("div");
-		levelDiv.className = 'levelDiv';
-		levelDiv.style = 'border:1px solid black;';
-		element.appendChild(levelDiv);
+		const containerDiv = document.createElement("div");
+		containerDiv.className = 'containerDiv';
+		containerDiv.style = 'border:1px solid gray;  margin-left: 30px';
+		element.appendChild(containerDiv);
 
 	    for (let i = 0; i < structure.length; i++) {
+
 			const inpEl = createStructureElement(structure[i]);
 			if (!inpEl)
 			    continue;
-			levelDiv.appendChild(inpEl);
+			containerDiv.appendChild(inpEl);
 
+			let divForUnit = null;
+			let divForInputs = null;
+			if (structure[i].repeating) {
+				divForUnit = document.createElement("div");
+				divForInputs = document.createElement("div");
+				divForInputs.className = 'divForInputs';
+				divForUnit.appendChild(divForInputs);
+				inpEl.appendChild(divForUnit);
+			}
 
 			if (structure[i].children && structure[i].children.length > 0) {
-				const div = document.createElement("div");
-				div.style = "margin-left: 30px";
-				inpEl.appendChild(div);
-				const divForChildren = document.createElement("div");
-				divForChildren.className = 'divForChildren';
-				div.appendChild(divForChildren);
-				recursiveFormImputs(divForChildren, structure[i].children);
-				
-				
-				if (structure[i].repeating) {
-					const addBtn = document.createElement("button");
-					addBtn.textContent = "+";
-					div.appendChild(addBtn);
-					
-					const removeBtn = document.createElement("button");
-					removeBtn.textContent = "-";
-					removeBtn.disabled = true;
-					div.appendChild(removeBtn);
+				recursiveFormImputs(structure[i].repeating ? divForInputs : inpEl, structure[i].children);
+			}
 
-					addBtn.addEventListener('click', async function(event) {
-						event.preventDefault();
-						recursiveFormImputs(divForChildren, structure[i].children);
-						removeBtn.disabled = false;
-					});
-				
-					removeBtn.addEventListener('click', async function(event) {
-						event.preventDefault();
-						if (divForChildren.children.length > 1)
-							divForChildren.removeChild(divForChildren.lastChild);
+			if (structure[i].repeating) {
+				const addBtn = document.createElement("button");
+				addBtn.textContent = "+";
+				divForUnit.appendChild(addBtn);
 
-						if (divForChildren.children.length <= 1)
-							removeBtn.disabled = true;
-					});
-				}
+				const removeBtn = document.createElement("button");
+				removeBtn.textContent = "-";
+				removeBtn.disabled = true;
+				divForUnit.appendChild(removeBtn);
+
+				addBtn.addEventListener('click', async function(event) {
+					event.preventDefault();
+
+					if(structure[i].children && structure[i].children.length > 0)
+						recursiveFormImputs(divForInputs, structure[i].children);
+					else {
+						const inpElAdd = createStructureElement(structure[i]);
+						if (!inpElAdd)
+							return;
+						divForInputs.appendChild(inpElAdd);
+					}
+					removeBtn.disabled = false;
+				});
+
+				removeBtn.addEventListener('click', async function(event) {
+					event.preventDefault();
+
+					if (divForInputs.children.length > 1)
+						divForInputs.removeChild(divForInputs.lastChild);
+
+					if (divForInputs.children.length <= 1)
+						removeBtn.disabled = true;
+				});
 			}
 		}
 	}
@@ -214,7 +226,7 @@
 
 		const div = document.createElement("div");
 		div.className = "structElement";
-		div.style = "margin: 10px;"
+		div.style = "margin-top: 10px;";
 		div.dto = structureElement;
 		
 		const label = document.createElement("label");
@@ -222,6 +234,7 @@
         div.appendChild(label);
 		 
 		if (structureElement.children && structureElement.children.length > 0) {
+			div.style = "border:1px solid black;";
             return div;
 		}
 
