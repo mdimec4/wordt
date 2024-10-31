@@ -360,15 +360,12 @@
 				for(let i = 0; i < element.children.length; i++) {
 					buildRequestDataFromInputsScreenRecursive(element.children[i], dtoOut.children);
 				}
-			} else {
-				const textareas = element.getElementsByTagName("textarea");
-				const inputs = element.getElementsByTagName("input");
-				
-				if (textareas && textareas.length > 0) {
-					dtoOut.value = textareas[0].value;
-				} else if (inputs && inputs.length > 0) {
-					dtoOut.value = inputs[0].value;
-				}
+			} else if(element.children && element.children.length > 0 && (element.children[2].tagName === "TEXTAREA" || element.children[2].tagName === "INPUT")) {
+				dtoOut.value = element.children[2].value;
+			}
+	
+			for(let i = 0; i < element.children.length; i++) {
+				buildRequestDataFromInputsScreenRecursive(element.children[i], dtoObj);
 			}
 		} else {
 			for(let i = 0; i < element.children.length; i++) {
