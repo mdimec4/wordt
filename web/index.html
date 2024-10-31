@@ -360,7 +360,7 @@
 				for(let i = 0; i < element.children.length; i++) {
 					buildRequestDataFromInputsScreenRecursive(element.children[i], dtoOut.children);
 				}
-			} else if(element.children && element.children.length > 0 && (element.children[2].tagName === "TEXTAREA" || element.children[2].tagName === "INPUT")) {
+			} else if(element.children && element.children.length >= 3 && (element.children[2].tagName === "TEXTAREA" || element.children[2].tagName === "INPUT")) {
 				dtoOut.value = element.children[2].value;
 			}
 	
