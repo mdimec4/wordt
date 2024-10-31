@@ -266,7 +266,7 @@ public class WordContentControlPopulatorUtil {
 
 	private static P createP(Object parent, P referenceP) {
 		P p = new P();
-		if (referenceP != null) {
+		if (referenceP != null && referenceP.getPPr() != null) {
 			PPr ppr = XmlUtils.deepCopy(referenceP.getPPr());
 			p.setPPr(ppr);
 		}
@@ -278,7 +278,7 @@ public class WordContentControlPopulatorUtil {
 		if (contentText == null)
 			contentText = "";
 		R r = new R();
-		if (referenceR != null) {
+		if (referenceR != null && referenceR.getRPr() != null) {
 			RPr rpr = XmlUtils.deepCopy(referenceR.getRPr());
 			rpr.setRStyle(null);
 
@@ -363,7 +363,7 @@ public class WordContentControlPopulatorUtil {
 
 	private static void populateDocumentRecursive(List<Object> docElementContent,
 			Map<String, List<ContentControlValuesDTO>> dtoContent, boolean parenSdtIsRepeatingSectionItem,
-			Map<String, Integer> repeatingSectionitemIndexMap) {
+			Map<String, Integer> repeatingSectionitemIndexMap, String repitingSectionTag) {
 		if (docElementContent == null || dtoContent == null)
 			return;
 		Map<String, Integer> repeatingSectionitemIndexMapForNextGeneration = repeatingSectionitemIndexMap;
@@ -376,6 +376,7 @@ public class WordContentControlPopulatorUtil {
 			// System.out.println(object.getClass().getSimpleName());
 
 			boolean forNextGenerationIsSdtRepeatingSectionItem = parenSdtIsRepeatingSectionItem;
+			String nextRepeatingSectionTag = repitingSectionTag;
 
 			List<Object> childContent = null;
 			Map<String, List<ContentControlValuesDTO>> childDTOs = null;
@@ -402,6 +403,7 @@ public class WordContentControlPopulatorUtil {
 				boolean isRepeatingSection = WordContentControlAnalayzerUtil.isW15RepeatingSection(sdtElement);
 				if (isRepeatingSection) {
 					repeatingSectionitemIndexMapForNextGeneration = new HashMap<String, Integer>();
+					nextRepeatingSectionTag = tag;
 				}
 				// System.out.println("isRepeatingSection: " + isRepeatingSection);
 				boolean isRepeatingSectionItem = WordContentControlAnalayzerUtil.isW15RepeatingSectionItem(sdtElement);
@@ -420,17 +422,37 @@ public class WordContentControlPopulatorUtil {
 
 					if (isRepeatingSection) {
 						int expectedNumber = getNumberOfRepeatedItemsFromDTO(dtos.get(0));
-						int haveNumber = childContent.size();
-						int toAddNumber = expectedNumber - haveNumber;
-						if (haveNumber > 0) {
-							SdtElement repeatItem = WordContentControlAnalayzerUtil
-									.findRepeatingSectionItemChild(sdtElement);
-
-							if (repeatItem != null) {
-								for (int j = 0; j < toAddNumber; j++) {
-									SdtElement repeatItemCopy = XmlUtils.deepCopy(repeatItem);
-									childContent.add(repeatItemCopy);
-									// System.out.println("Add copy");
+						if (expectedNumber > 0) { //we have some children
+							int haveNumber = childContent.size();
+							int toAddNumber = expectedNumber - haveNumber;
+							if (haveNumber > 0) {
+								SdtElement repeatItem = WordContentControlAnalayzerUtil
+										.findRepeatingSectionItemChild(sdtElement);
+	
+								if (repeatItem != null) {
+									for (int j = 0; j < toAddNumber; j++) {
+										SdtElement repeatItemCopy = XmlUtils.deepCopy(repeatItem);
+										childContent.add(repeatItemCopy);
+										// System.out.println("Add copy");
+									}
+								}
+							}
+						} else {
+							int noRepeats = dtos.size();
+							if (noRepeats > 0) { //we have some children
+								int haveNumber = childContent.size();
+								int toAddNumber = noRepeats - haveNumber;
+								if (haveNumber > 0) {
+									SdtElement repeatItem = WordContentControlAnalayzerUtil
+											.findRepeatingSectionItemChild(sdtElement);
+		
+									if (repeatItem != null) {
+										for (int j = 0; j < toAddNumber; j++) {
+											SdtElement repeatItemCopy = XmlUtils.deepCopy(repeatItem);
+											childContent.add(repeatItemCopy);
+											// System.out.println("Add copy");
+										}
+									}
 								}
 							}
 						}
@@ -443,8 +465,18 @@ public class WordContentControlPopulatorUtil {
 						populateWithText(sdtElement, textValue);
 					}
 
-					if (dtos.size() >= (repeatingSectionitemIndex + 1)) {
+					if (dtos.size() >= (repeatingSectionitemIndex + 1) && parenSdtIsRepeatingSectionItem) {
 						childDTOs = dtos.get(repeatingSectionitemIndex).getChildren();
+					}
+				} else if (isRepeatingSectionItem && repitingSectionTag != null && !repitingSectionTag.isEmpty()) {
+					List<ContentControlValuesDTO> dtos = dtoContent.get(repitingSectionTag);
+					if (dtos == null || dtos.isEmpty())
+						continue;
+					if (dtos.size() >= (i + 1)) {
+						String textValue = dtos.get(i).getValue();
+						if (textValue == null)
+							textValue = "";
+						populateWithText(sdtElement, textValue);
 					}
 				}
 
@@ -465,10 +497,10 @@ public class WordContentControlPopulatorUtil {
 
 			if (childContent != null && childDTOs == null)
 				populateDocumentRecursive(childContent, dtoContent, forNextGenerationIsSdtRepeatingSectionItem,
-						repeatingSectionitemIndexMapForNextGeneration);
+						repeatingSectionitemIndexMapForNextGeneration, nextRepeatingSectionTag);
 			else if (childContent != null && childDTOs != null)
 				populateDocumentRecursive(childContent, childDTOs, forNextGenerationIsSdtRepeatingSectionItem,
-						repeatingSectionitemIndexMapForNextGeneration);
+						repeatingSectionitemIndexMapForNextGeneration, nextRepeatingSectionTag);
 		}
 	}
 
@@ -492,15 +524,15 @@ public class WordContentControlPopulatorUtil {
 
 		for (JaxbXmlPart headerPart : headerParts) {
 			populateDocumentRecursive(((ContentAccessor) headerPart.getContents()).getContent(), dtoContent, false,
-					null);
+					null, null);
 		}
 		// get main part placeholders
-		populateDocumentRecursive(mainDocumentPart.getContent(), dtoContent, false, null);
+		populateDocumentRecursive(mainDocumentPart.getContent(), dtoContent, false, null, null);
 
 		// get footer placeholders
 		for (JaxbXmlPart footerPart : footerParts) {
 			populateDocumentRecursive(((ContentAccessor) footerPart.getContents()).getContent(), dtoContent, false,
-					null);
+					null, null);
 		}
 	}
 }
