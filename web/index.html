@@ -3,11 +3,20 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>DOCX template populator tool</title>
-	<meta name="description" content="Write MS Word template once and use 'DOCX template tool' to isue as many unique versions of documents as you need. All that with use of web formis." />
+	<meta http-equiv='content-language' content='en-US'>
+	<title>MS Word - DOCX placeholder template populator tool</title>
+	<meta name="description" content="Write MS Word template once and use 'DOCX template tool' to populate placeholders and generate as many unique versions of a documents as you need." />
 	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	
+	<link rel="canonical" href="https://docxt.mdtools.xyz">
+	
+	<meta property="og:title" content="MS Word - DOCX placeholder template populator tool" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://docxt.mdtools.xyz/" />
+	<meta property="og:image" content="icon.png" />
+	
 	<style>
         body {
            background-color: lightblue;
@@ -34,33 +43,35 @@
 	</style>
 </head>
 <body>
-	<iframe data-aa='2363747' src='//acceptable.a-ads.com/2363747' style='border:0px; padding:0; width:100%; height:100%; overflow:hidden; background-color: transparent;'></iframe>
+        <div id="frame" style="width: 100%;"><iframe data-aa='2363747' src='//acceptable.a-ads.com/2363747' style='border:0px; padding:0; width:100%; height:100%; overflow:hidden; background-color: transparent;'></iframe><a style="display: block; text-align: right; font-size: 12px" id="frame-link" href="https://aads.com/campaigns/new/?source_id=2363747&source_type=ad_unit&partner=2363747">Advertise here</a></div>
+
 	<div id="titlediv">
-		<img src="icon.png" width="64px" hight="64px"/>
-		<h1>DOCX template populator tool</h1>
+		<img src="icon.png" width="64px" hight="64px" alt="Icon" />
+		<h1>DOCX placeholder template populator tool</h1>
 	</div>
 	
+		 
+	    
     <div id="upload_screen" style="display: inline">
+    		<div id="upload_screen_err" style="color: red"></div>
+    		<div>
+		    <form method="post" enctype="multipart/form-data" id="upload_form">
+                        <label for="file">Select docx template:</label>
+                        <br />
+                        <input id="file" name="file" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="custom-file-input"/>
+                
+	                <button class="btn btn-primary">Upload</button>
+                    </form>
+		</div>
 		<img src="ccTransform.gif" alt="transform" width="600px" style="margin: 10px"/>
 		<p>Do you have a template document that stays mostly the same for each instance? For example an Employment Agreement stays mostly the same text for each employee.</p>
-		<p>Are you tierd of scrolling trough your Microsoft Word template and manually changing placeholders for each instance of final document?</p>
+		<p>Are you tired of scrolling trough your Microsoft Word template and manually changing placeholders for each instance of final document?</p>
 		<p>Why not try this tool? Upload docx template. Fill the web form and download complete documents!</p>
 	    <br />
-		<p>1. Enquip your template with Content Control placeholders. See <a href="ccInstructions.html">instructions!</a></p>
+		<p>1. Equip your template with Content Control placeholders. See <a href="ccInstructions.html">instructions!</a></p>
 		<p>2. Upload your template (bellow), fil the form (as many times as you wish) and download complete documents.</p>
 		<br/>
-	    <div id="upload_screen_err" style="color: red"></div>
-	    
-		<div>
-		    <form method="post" enctype="multipart/form-data" id="upload_form">
-                <label for="file">Select docx template:</label>
-			    <br />
-                <input id="file" name="file" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="custom-file-input"/>
-                
-			    <button class="btn btn-primary">Upload</button>
-            </form>
-		</div>
-		<p style="margin-top: 20px"><b>Privacy notice:</b> Uploaded document will live inside server memory for one to max two hours after upload or last download! After that time it will be forgoten. Also clicing "Cancel" will dispose document immediately.</p>
+
 	</div>
 		
 	<div id="loading_screen" style="display: none" class="container-loading">
@@ -79,10 +90,12 @@
 					<button id="inputs-cancel" class="btn btn-secundary btn-lg">Cancel</button>
 					<button id="inputs-download" class="btn btn-primary btn-lg">Download</button>
 				</div>
-            </form>
+		</form>
 		</div>
 	</div>
-
+	<p style="margin-top: 20px"><b>Privacy notice:</b> Uploaded document will live inside server memory for one to max two hours after upload or last download! After that time it will be forgoten. Also clicing "Cancel" will dispose document immediately.</p>
+	<p>Check for other tools on <a href="https://mdtools.xyz">mdtools.xyz</a></p>
+	
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
     const form = document.getElementById("upload_form");
